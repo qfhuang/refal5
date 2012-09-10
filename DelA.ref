@@ -1,0 +1,12 @@
+* Delete all 'a' symbols from text.
+
+$ENTRY Go
+{
+    = <Prout <DelA <Card>>>;
+}
+
+DelA
+{
+    e.1 'a' e.2 = e.1 <DelA e.2>;
+    e.1         = e.1;
+}

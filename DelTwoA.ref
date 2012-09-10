@@ -1,0 +1,23 @@
+* Delete two 'a' symbols, if input contain only two 'a' symbols.
+* Otherwise, do nothing.
+
+$ENTRY Go
+{
+    = <Prout <DelTwoA <Card>>>;
+}
+
+DelTwoA
+{
+    e.1 'a' e.2 'a' e.3,
+    <ContainA e.1> : False,
+    <ContainA e.2> : False,
+    <ContainA e.3> : False
+        = e.1 e.2 e.3;
+    e.1 = e.1;
+}
+
+ContainA
+{
+    e.1 'a' e.3 = True;
+    e.1         = False;
+}
