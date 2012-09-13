@@ -1,0 +1,27 @@
+$ENTRY Go
+{
+    = <DelRepDouble <Card>>;
+}
+
+DelRepDouble
+{
+    0   = <Exit 0>;
+    e.1 =
+        <Prout <DelRep1 e.1>>
+        <Prout <DelRep2 e.1>>;
+}
+
+DelRep1
+{
+    e.X s.1 e.Y s.1 e.Z = <DelRep1 e.X s.1 e.Y e.Z>;
+    e.1                 = e.1;
+}
+
+DelRep2
+{
+    (e.1) s.2 e.3, e.1 : e.X s.2 e.Y = <DelRep2 (e.1) e.3>;
+    (e.1) s.2 e.3                    = <DelRep2 (e.1 s.2) e.3>;
+
+    (e.1) = e.1;
+    e.1   = <DelRep2 () e.1>;
+}
