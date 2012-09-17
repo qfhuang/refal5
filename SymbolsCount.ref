@@ -1,0 +1,18 @@
+* Calc count of each symbol in input line.
+* Example input: "abadbc".
+* Proper output: "(a2) (b2) (d1) (c1)".
+
+$ENTRY Go
+{
+    = <Prout <Calc <Card>>>;
+}
+
+Calc
+{
+    0 = <Exit 0>; /* EOF */
+
+    (e.X (s.1 s.N) e.Y) s.1 e.Z = <Calc (e.X (s.1 <+ s.N 1>) e.Y) e.Z>;
+    (e.X) s.1 e.Z               = <Calc (e.X (s.1 1)            ) e.Z>;
+    (e.1) = e.1;
+    e.1   = <Calc () e.1>;
+}
