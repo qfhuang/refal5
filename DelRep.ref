@@ -1,3 +1,5 @@
+* Delete all duplicated symbols, save only first.
+
 $ENTRY Go
 {
     = <DelRepDouble <Card>>;
@@ -5,7 +7,7 @@ $ENTRY Go
 
 DelRepDouble
 {
-    0   = <Exit 0>;
+    0   = <Exit 0>; /* EOF */
     e.1 =
         <Prout <DelRep1 e.1>>
         <Prout <DelRep2 e.1>>;

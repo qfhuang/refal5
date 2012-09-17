@@ -8,6 +8,8 @@ $ENTRY Go
 
 DelTwoA
 {
+    0 = <Exit 0>; /* EOF */
+
     e.1 'a' e.2 'a' e.3,
     <ContainA e.1> : False,
     <ContainA e.2> : False,
