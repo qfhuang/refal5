@@ -1,2 +1,3 @@
 *.rsl
 .vim
+*.sw[a-z]
