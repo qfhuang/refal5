@@ -1,0 +1,39 @@
+* Expression differentiation.
+* Input format: "Dvariable:expression".
+
+$EXTERNAL Parse;
+
+$ENTRY Go
+{
+    = <Introduction> <Loop <GetInputLine>>;
+}
+
+Introduction
+{
+    = <Prout 'TODO: introduction.'>;
+}
+
+Loop
+{
+    0   = <Prout 'Exiting...'><Exit 0>; /* EOF */
+        = <Loop <GetInputLine>>;
+
+    e.In,
+    <Parse e.In> : (t.Var) e.Expr =
+        <Prout (t.Var) e.Expr>
+        <Loop <GetInputLine>>;
+
+    e.In =
+        <Prout 'Parse error.'>
+        <Loop <GetInputLine>>;
+}
+
+GetInputLine
+{
+    = <Prompt> <Card>;
+}
+
+Prompt
+{
+    = <Prout 'Type "Dvariable:expression":'>;
+}
