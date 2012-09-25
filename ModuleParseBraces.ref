@@ -1,0 +1,36 @@
+* Usage:
+* ---- In source ----
+* $EXTERNAL ParseBraces
+* ...<ParseBraces <Card>>...
+* ---- In command line ----
+* refgo ModuleParseBraces+YourProgram
+
+$ENTRY ParseBraces
+{
+    0 = <Exit 0>; /* EOF */
+
+    e.1 ')' e.2 =
+        <ParseBraces <ParseLeft e.1> e.2>;
+
+    e.1 '(' e.2 =
+        <Prout 'Unpaired brace: \'(\'.'><Exit 1>;
+
+    e.X = e.X;
+}
+
+ParseLeft
+{
+    e.X '(' e.Y,
+    <ContainLeft e.Y> : False =
+        e.X (e.Y);
+
+    e.X =
+        <Prout 'Unpaired brace, cannot find \'(\'.'><Exit 1>;
+}
+
+ContainLeft
+{
+    e.A '(' e.B = True;
+
+    e.Y = False;
+}

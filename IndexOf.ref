@@ -1,0 +1,31 @@
+* Input: "(substr) str".
+* Output: "macrodigit" (index of substring)
+* or "- macrodigit", where macrodigit is 1.
+
+$EXTERNAL ParseBraces;
+
+$ENTRY Go
+{
+    = <Prout <ToIndexOf <ParseBraces <Card>>>>;
+}
+
+ToIndexOf
+{
+    (e.Substr) e.Str = <IndexOf (e.Substr) e.Str>;
+
+    e.X = <Prout 'Uncorrect input.'><Exit 1>;
+}
+
+IndexOf
+{
+    (e.Substr) e.X e.Substr e.Y = <Length (0) e.X>;
+
+    (e.Substr) e.X = '-' 1;
+}
+
+Length
+{
+    (s.Count) s.1 e.X = <Length (<+ s.Count 1>) e.X>;
+
+    (s.Count) = s.Count;
+}

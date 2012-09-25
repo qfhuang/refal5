@@ -1,0 +1,30 @@
+* Set is (e.1), where e.1 is empty or not duplicated symbols.
+* Order of symbols do not matter.
+
+$EXTERNAL ParseBraces;
+
+$ENTRY Go
+{
+    = <Prout <ToIntersection <ParseBraces <Card>>>>;
+}
+
+ToIntersection
+{
+    (e.X s.1 e.Y s.1 e.Z) (e.A) =
+        <Prout 'First set contain duplicates.'><Exit 1>;
+
+    (e.X) (e.A s.1 e.B s.1 e.C) =
+        <Prout 'Second set contain duplicates.'><Exit 1>;
+
+    (e.X) (e.A) = <Intersection (e.X) (e.A) ()>;
+
+    e.X = <Prout 'Input parsing error, enter two sets.'><Exit 1>;
+}
+
+Intersection
+{
+    (e.X s.1 e.Y) (e.A s.1 e.B) (e.Z) =
+        <Intersection (e.Y) (e.A e.B) (e.Z s.1)>;
+
+    (e.X) (e.A) (e.Z) = (e.Z);
+}

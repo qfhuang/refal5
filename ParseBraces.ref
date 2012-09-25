@@ -1,0 +1,52 @@
+* Translate (), [] and {} to structure braces.
+
+$ENTRY Go
+{
+    = <Prout <ParseBraces <Card>>>;
+}
+
+ParseBraces
+{
+    0 = <Exit 0>; /* EOF */
+
+    e.1 s.X e.2,
+    <Contain (')]}') s.X> : True =
+        <ParseBraces <ParseLeft (<Pair s.X>) e.1> e.2>;
+
+    e.1 s.X e.2,
+    <Contain ('([{') s.X> : True =
+        <Prout 'Unpaired brace: \'' s.X '\'.'><Exit 1>;
+
+    e.X = e.X;
+}
+
+ParseLeft
+{
+    (s.1) e.X s.2 e.Y,
+    <Contain ('([{') s.2> : True,
+    <Contain ('([{') e.Y> : False,
+    s.1 s.2 e.X (e.Y) :
+    {
+        s.1 s.1 e.X (e.Y) = e.X (e.Y);
+
+        s.1 s.2 e.X (e.Y) =
+            <Prout 'Mishmash in different type braces.'><Exit 1>;
+    };
+
+    (s.1) e.X =
+        <Prout 'Unpaired brace, cannot find \'' s.1 '\'.'><Exit 1>;
+}
+
+Contain
+{
+    (e.X s.1 e.Y) e.A s.1 e.B = True;
+
+    (e.X) e.Y = False;
+}
+
+Pair
+{
+    ')' = '(';
+    ']' = '[';
+    '}' = '{';
+}
