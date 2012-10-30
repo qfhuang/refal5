@@ -127,11 +127,12 @@ Expr_1
 
 Expr_2
 {
-    e.InExpr_1 s.Op e.InExpr_2,
+    e.InExpr_2 s.Op e.InExpr_1,
     <Contain (Mul Div) s.Op> : True,
-    <Expr_1 e.InExpr_1> : t.OutExpr_1,
-    <Expr_2 e.InExpr_2> : t.OutExpr_2 =
-        (s.Op t.OutExpr_1 t.OutExpr_2);
+    <Contain (Mul Div) e.InExpr_1> : False,
+    <Expr_2 e.InExpr_2> : t.OutExpr_2,
+    <Expr_1 e.InExpr_1> : t.OutExpr_1 =
+        (s.Op t.OutExpr_2 t.OutExpr_1);
 
     e.InExpr_1,
     <Expr_1 e.InExpr_1> : t.OutExpr_1 =
@@ -142,12 +143,12 @@ Expr_2
 
 Expression
 {
-    /* TODO: e.InExpr s.Op e.InExpr_2 */
-    e.InExpr_2 s.Op e.InExpr,
+    e.InExpr s.Op e.InExpr_2,
     <Contain (Plus Minus) s.Op> : True,
-    <Expr_2     e.InExpr_2> : t.OutExpr_2,
-    <Expression e.InExpr>   : t.OutExpr =
-        (s.Op t.OutExpr_2 t.OutExpr);
+    <Contain (Plus Minus) e.InExpr_2> : False,
+    <Expression e.InExpr>   : t.OutExpr,
+    <Expr_2     e.InExpr_2> : t.OutExpr_2 =
+        (s.Op t.OutExpr t.OutExpr_2);
 
     e.InExpr_2,
     <Expr_2 e.InExpr_2> : t.OutExpr_2 =
