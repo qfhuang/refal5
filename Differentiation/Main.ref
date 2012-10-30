@@ -2,6 +2,7 @@
 * Input format: "Dvariable:expression".
 
 $EXTERNAL Parse;
+$EXTERNAL Differentiation;
 
 $ENTRY Go
 {
@@ -19,8 +20,8 @@ Loop
         = <Loop <GetInputLine>>;
 
     e.In,
-    <Parse e.In> : (t.Var) e.Expr =
-        <Prout (t.Var) e.Expr>
+    <Parse e.In> : (t.Var) t.Expr =
+        <Prout <Differentiation (t.Var) t.Expr>>
         <Loop <GetInputLine>>;
 
     e.In =

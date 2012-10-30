@@ -1,4 +1,8 @@
 $EXTERNAL Lex;
+$EXTERNAL FuncNamesSet;
+$EXTERNAL Contain;
+$EXTERNAL IsVariable;
+$EXTERNAL IsMacrodigit;
 
 $ENTRY Parse
 {
@@ -8,31 +12,6 @@ $ENTRY Parse
         (t.OutVar) t.OutExpr;
 
     e.X =;
-}
-
-AllFuncNamesSet
-{
-    = <FuncNamesSet> Plus Minus Mul Div Invol
-}
-
-FuncNamesSet
-{
-    = sin cos ln exp sqrt arcsin arccos;
-}
-
-IsMacrodigit
-{
-    s.1, <Type s.1> : 'N0' s.1 = True;
-
-    s.1 = False;
-}
-
-IsVariable
-{
-    s.1, <Type s.1> : 'Wi' s.1,
-    <Contain (<AllFuncNamesSet>) s.1> : False = True;
-
-    s.1 = False;
 }
 
 /* TODO: recursive processing expression e.g. "---5", necessary? */
@@ -156,53 +135,3 @@ Expression
 
     e.X =;
 }
-
-/*
-* <InSet (Set) Symbol>.
-InSet
-{
-    (e.X s.2 e.Y) s.2 = True;
-    (e.1) s.2         = False;
-}
-
-* <Contain (Set) Symbols>.
-Contain
-{
-    () e.2 = False;
-    (e.1)  = False;
-
-    (e.1) e.2 s.3 e.4, <Contain (e.1) s.3> : True = True;
-
-    (e.1) e.2 = False;
-}
-*/
-
-* <Contain (Set) Symbols>.
-Contain
-{
-    (e.1 s.X e.2) e.3 s.X e.4 = True;
-    (e.1) e.2                 = False;
-}
-
-/*
-ParseParentheses
-{
-    e.1 '(' e.2 ')' e.3, <ContainParentheses e.2> : False =
-        <Parse e.1 (e.2) e.3>;
-
-    e.1 '(' e.2 =
-        <Prout 'Parse: unpaired left parentheses: '  e.1 '(' e.2>;
-
-    e.1 ')' e.2 =
-        <Prout 'Parse: unpaired right parentheses: ' e.1 ')' e.2>;
-
-    e.1 = e.1;
-}
-
-ContainParentheses
-{
-    e.1 '(' e.2 = True;
-    e.1 ')' e.2 = True;
-    e.1         = False;
-}
-*/

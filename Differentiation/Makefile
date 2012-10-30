@@ -1,5 +1,5 @@
-MODULES = Main.rsl Differentiation.rsl Parser.rsl Lexer.rsl
-RUN     = Main+Differentiation+Parser+Lexer
+MODULES = Main.rsl Differentiation.rsl Parser.rsl Utils.rsl Lexer.rsl
+RUN     = Main+Differentiation+Parser+Utils+Lexer
 
 default: run
 
