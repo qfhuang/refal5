@@ -81,7 +81,7 @@ FuncPair
 DFunc
 {
     (t.Var) (t.FuncName t.Expr) =
-        (Mul <FuncPair t.FuncName t.Expr> <DExpression (t.Var) t.Expr>);
+        (Mul <FuncPair (t.FuncName t.Expr)> <DExpression (t.Var) t.Expr>);
 }
 
 DExpr_0
