@@ -60,11 +60,21 @@ Invol
     e.X =;
 }
 
+Function
+{
+    t.FuncName '(' e.InExpr ')',
+    <Contain (<FuncNamesSet>) t.FuncName> : True,
+    <Expression e.InExpr> : t.OutExpr =
+        (t.FuncName t.OutExpr);
+
+    e.X =;
+}
+
 Expr_0
 {
     t.Macrodigit,
-    <IsMacrodigit t.Macrodigit> : True =
-        t.Macrodigit;
+    <Number t.Macrodigit> : t.OutNumber =
+        t.OutNumber;
 
     t.Variable,
     <IsVariable t.Variable> : True =
@@ -74,13 +84,11 @@ Expr_0
     <Invol e.InInvol> : t.OutInvol =
         t.OutInvol;
 
-    t.FuncName '(' e.InExpr ')',
-    <Contain (<FuncNamesSet>) t.FuncName> : True,
-    <Expression e.InExpr> : t.OutExpr =
-        (t.FuncName t.OutExpr);
+    e.InFunction,
+    <Function e.InFunction> : t.OutFunction =
+        t.OutFunction;
 
     '(' e.Expr ')',
-    <Contain ('(' ')') e.Expr> : False,
     <Expression e.Expr> : t.OutExpr =
         t.OutExpr;
 

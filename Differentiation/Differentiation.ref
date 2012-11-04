@@ -100,6 +100,9 @@ DExpr_0
     (t.Var) (t.FuncName t.Expr),
     <Contain (<FuncNamesSet>) t.FuncName> : True =
         <DFunc (t.Var) (t.FuncName t.Expr)>;
+
+    (t.Var) t.Expr =
+        <DExpression (t.Var) t.Expr>;
 }
 
 DExpr_1
