@@ -9,15 +9,39 @@ $ENTRY Parse
     s.D1 e.InExpr '/' s.D2 e.InVar,
     <Contain ('Dd') s.D1> : True,
     <Contain ('Dd') s.D2> : True,
-    <Expression <Lex e.InExpr>> : t.OutExpr,
+    <Expression <PrepareParse <Lex e.InExpr>>> : t.OutExpr,
     <Variable   <Lex e.InVar>>  : t.OutVar =
         (t.OutVar) t.OutExpr;
 
     e.InExpr,
-    <Expression <Lex e.InExpr>> : t.OutExpr =
+    <Expression <PrepareParse <Lex e.InExpr>>> : t.OutExpr =
         t.OutExpr;
  
-    e.X =;
+    e.X = <ParserDebug ('Parse') e.X>;
+}
+
+ParserDebug
+{
+/*
+    (e.FunctionName) e.X =
+        <Prout 'DEBUG: ' e.FunctionName ': ' e.X>;
+*/
+
+    (e.FunctionName) e.X =;
+}
+
+PrepareParse
+{
+    e.X t.FuncName '(' e.InExpr ')' e.Y,
+    <IsFunctionName t.FuncName> : True,
+    <Contain ('(' ')') e.InExpr> : False =
+        <PrepareParse e.X (t.FuncName e.InExpr) e.Y>;
+
+    e.X '(' e.InExpr ')' e.Y,
+    <Contain ('(' ')') e.InExpr> : False =
+        <PrepareParse e.X (e.InExpr) e.Y>;
+
+    e.X = e.X;
 }
 
 ConstPower
@@ -38,7 +62,7 @@ ConstPower
     <ConstPower e.InConstPower> : s.Macrodigit =
         (MonadicMinus s.Macrodigit);
 
-    e.X =;
+    e.X = <ParserDebug ('ConstPower') e.X>;
 }
 
 Number
@@ -47,7 +71,7 @@ Number
     <IsMacrodigit s.Macrodigit> : True =
         s.Macrodigit;
 
-    e.X =;
+    e.X = <ParserDebug ('Number') e.X>;
 }
 
 Variable
@@ -56,7 +80,7 @@ Variable
     <IsVariable s.Variable> : True =
         s.Variable;
 
-    e.X =;
+    e.X = <Prout 'DEBUG: Variable' e.X>;
 }
 
 Invol
@@ -66,17 +90,17 @@ Invol
     <ConstPower e.InConstPower> : t.OutConstPower =
         (Invol t.OutExpr t.OutConstPower);
 
-    e.X =;
+    e.X = <ParserDebug ('Invol') e.X>;
 }
 
 Function
 {
-    t.FuncName '(' e.InExpr ')',
+    (t.FuncName e.InExpr),
     <IsFunctionName t.FuncName> : True,
     <Expression e.InExpr> : t.OutExpr =
         (t.FuncName t.OutExpr);
 
-    e.X =;
+    e.X = <ParserDebug ('Function') e.X>;
 }
 
 Expr_0
@@ -97,11 +121,11 @@ Expr_0
     <Function e.InFunction> : t.OutFunction =
         t.OutFunction;
 
-    '(' e.Expr ')',
+    (e.Expr),
     <Expression e.Expr> : t.OutExpr =
         t.OutExpr;
 
-    e.X =;
+    e.X = <ParserDebug ('Expr_0') e.X>;
 }
 
 Expr_1
@@ -118,7 +142,7 @@ Expr_1
     <Expr_0 e.InExpr_0> : t.OutExpr_0 =
         t.OutExpr_0;
 
-    e.X =;
+    e.X = <ParserDebug ('Expr_1') e.X>;
 }
 
 Expr_2
@@ -134,7 +158,7 @@ Expr_2
     <Expr_1 e.InExpr_1> : t.OutExpr_1 =
         t.OutExpr_1;
 
-    e.X =;
+    e.X = <ParserDebug ('Expr_2') e.X>;
 }
 
 Expression
@@ -150,5 +174,5 @@ Expression
     <Expr_2 e.InExpr_2> : t.OutExpr_2 =
         t.OutExpr_2;
 
-    e.X =;
+    e.X = <ParserDebug ('Expression') e.X>;
 }
