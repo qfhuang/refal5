@@ -1,7 +1,8 @@
-$EXTERNAL FuncNamesSet;
 $EXTERNAL Contain;
 $EXTERNAL IsVariable;
 $EXTERNAL IsMacrodigit;
+$EXTERNAL IsFunctionName;
+$EXTERNAL SubConstNumber;
 
 $ENTRY Differentiation
 {
@@ -9,20 +10,6 @@ $ENTRY Differentiation
         <DExpression (t.Var) t.Expr>;
 
     e.X =;
-}
-
-/* TODO (maybe): SNumber -> ConstNumber (['-'] Macrodigit) */
-SubSNumber
-{
-    (s.Macrodigit_1) s.Macrodigit_2,
-    <Sub (s.Macrodigit_1) s.Macrodigit_2> :
-    {
-        s.Macrodigit = s.Macrodigit;
-        '-' s.Macrodigit = (MonadicMinus s.Macrodigit);
-    };
-
-    (MonadicMinus s.Macrodigit_1) s.Macrodigit_2 =
-        (MonadicMinus <Add (s.Macrodigit_1) s.Macrodigit_2>);
 }
 
 DVar
@@ -33,11 +20,11 @@ DVar
 
 DInvol
 {
-    (t.Var) (Invol t.Expr t.SNumber) =
+    (t.Var) (Invol t.Expr t.ConstPower) =
         (Mul
             (Mul
-                t.SNumber
-                (Invol t.Expr <SubSNumber (t.SNumber) 1>)
+                t.ConstPower
+                (Invol t.Expr <SubConstNumber (t.ConstPower) 1>)
             )
             <DExpression (t.Var) t.Expr>
         );
@@ -94,11 +81,11 @@ DExpr_0
     <IsVariable t.Variable> : True =
         <DVar (t.Var) t.Variable>;
 
-    (t.Var) (Invol t.Expr t.SNumber) =
-        <DInvol (t.Var) (Invol t.Expr t.SNumber)>;
+    (t.Var) (Invol t.Expr t.ConstPower) =
+        <DInvol (t.Var) (Invol t.Expr t.ConstPower)>;
 
     (t.Var) (t.FuncName t.Expr),
-    <Contain (<FuncNamesSet>) t.FuncName> : True =
+    <IsFunctionName t.FuncName> : True =
         <DFunc (t.Var) (t.FuncName t.Expr)>;
 
     (t.Var) t.Expr =

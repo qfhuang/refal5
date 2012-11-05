@@ -1,8 +1,10 @@
-* Expression differentiation.
-* Input format: "Dvariable:expression".
+* Expression simplification and differentiation.
+* Input format: "Expression" or "[Dd]Expression/[Dd]Variable".
 
 $EXTERNAL Parse;
 $EXTERNAL Differentiation;
+$EXTERNAL SimplePresentation;
+$EXTERNAL FormatSimpleExpression;
 
 $ENTRY Go
 {
@@ -11,7 +13,7 @@ $ENTRY Go
 
 Introduction
 {
-    = <Prout 'TODO: introduction.'>;
+    = <Prout 'Input format: "Expression" or "[Dd]Expression/[Dd]Variable".'>;
 }
 
 Loop
@@ -21,7 +23,16 @@ Loop
 
     e.In,
     <Parse e.In> : (t.Var) t.Expr =
-        <Prout <Differentiation (t.Var) t.Expr>>
+        <Prout <FormatSimpleExpression <SimplePresentation
+            <Differentiation (t.Var) t.Expr>
+        >>>
+        <Loop <GetInputLine>>;
+
+    e.In,
+    <Parse e.In> : t.Expr =
+        <Prout <FormatSimpleExpression <SimplePresentation
+            t.Expr
+        >>>
         <Loop <GetInputLine>>;
 
     e.In =
@@ -34,7 +45,11 @@ GetInputLine
     = <Prompt> <Card>;
 }
 
+* Write is internal Refal 5 function, similar to PutOut, but does not add
+* newline symbol after output string. This function was added in
+* "VERSION-PZ-New 28.10.2004". See news.txt file in Refal 5 distributive.
+
 Prompt
 {
-    = <Prout 'Type "Dvariable:expression":'>;
+    = <Write 0 '$ '>;
 }

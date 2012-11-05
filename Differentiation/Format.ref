@@ -1,0 +1,111 @@
+$EXTERNAL Symb;
+$EXTERNAL Explode;
+$EXTERNAL IsFunctionName;
+
+$ENTRY FormatSimpleExpression
+{
+    (t.SimpleExpr_2_1 t.SimpleExpr_2_2 e.X) =
+        <FormatSimpleExpr_2 t.SimpleExpr_2_1> '+'
+        <FormatSimpleExpression (t.SimpleExpr_2_2 e.X)>;
+
+    (t.SimpleExpr_2) =
+        <FormatSimpleExpr_2 t.SimpleExpr_2>;
+
+    () =;
+
+    e.X =;
+}
+
+FormatSimpleExpr_2
+{
+    (t.SimpleSummand_1 (1 () ())) =
+        <FormatSimpleSummand t.SimpleSummand_1>;
+
+    (t.SimpleSummand_1 t.SimpleSummand_2) =
+        '(' <FormatSimpleSummand t.SimpleSummand_1> ')' '/'
+        '(' <FormatSimpleSummand t.SimpleSummand_2> ')';
+}
+
+FormatConst
+{
+    (MonadicMinus s.Macrodigit) = '-' <Symb s.Macrodigit>;
+    s.Macrodigit = <Symb s.Macrodigit>;
+}
+
+FormatVarPower
+{
+    (s.Variable s.ConstPower),
+        s.ConstPower : 1 =
+        <Explode s.Variable>;
+
+    (s.Variable t.ConstPower) =
+        <Explode s.Variable> '^' <FormatConst t.ConstPower>;
+}
+
+FormatMonomial
+{
+    (t.VarPower_1 t.VarPower_2 e.X) =
+        <FormatVarPower t.VarPower_1> '*'
+        <FormatMonomial (t.VarPower_2 e.X)>;
+
+    (t.VarPower) =
+        <FormatVarPower t.VarPower>;
+
+    () =;
+}
+
+FormatNonMonomialEntry
+{
+    (Invol t.SimpleExpr t.ConstPower) =
+        '(' <FormatSimpleExpression t.SimpleExpr> ')' '^'
+        <FormatConst t.ConstPower>;
+
+    (s.FuncName t.SimpleExpr),
+    <IsFunctionName s.FuncName> : True =
+        <Explode s.FuncName>
+        '(' <FormatSimpleExpression t.SimpleExpr> ')';
+
+    t.SimpleExpr =
+        '(' <FormatSimpleExpression t.SimpleExpr> ')';
+}
+
+FormatNonMonomial
+{
+    (t.SimpleFunc_1 t.SimpleFunc_2 e.X) =
+        <FormatNonMonomialEntry t.SimpleFunc_1> '*'
+        <FormatNonMonomial (t.SimpleFunc_2 e.X)>;
+
+    (t.SimpleFunc) =
+        <FormatNonMonomialEntry t.SimpleFunc>;
+
+    () =;
+}
+
+FormatSimpleSummand
+{
+    (t.ConstMult () ()) =
+        <FormatConst t.ConstMult>;
+
+    (1 t.Monomial ()) =
+        <FormatMonomial t.Monomial>;
+
+    (1 () t.NonMonomial) =
+        <FormatNonMonomial t.NonMonomial>;
+
+    (t.ConstMult t.Monomial ()) =
+        <FormatConst t.ConstMult> '*'
+        <FormatMonomial t.Monomial>;
+
+    (t.ConstMult () t.NonMonomial) =
+        <FormatConst t.ConstMult> '*'
+        <FormatNonMonomial t.NonMonomial>;
+
+    (1 t.Monomial t.NonMonomial) =
+        <FormatMonomial t.Monomial> '*'
+        <FormatNonMonomial t.NonMonomial>;
+
+    (t.ConstMult t.Monomial t.NonMonomial) =
+        <FormatConst t.ConstMult> '*'
+        <FormatMonomial t.Monomial> '*'
+        <FormatNonMonomial t.NonMonomial>;
+}

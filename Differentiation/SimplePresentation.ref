@@ -1,0 +1,162 @@
+$EXTERNAL IsMacrodigit;
+$EXTERNAL IsVariable;
+$EXTERNAL IsFunctionName;
+$EXTERNAL IsConstNumber;
+$EXTERNAL AddConstNumber;
+$EXTERNAL Contain;
+
+$ENTRY SimplePresentation
+{
+    t.Expr = <SimpleExpression t.Expr>;
+
+    e.X =;
+}
+
+NegConstNumber
+{
+    0 = 0;
+    (MonadicMinus s.Macrodigit) = s.Macrodigit;
+    s.Macrodigit = (MonadicMinus s.Macrodigit);
+}
+
+SimpleExpr_2_NegConst
+{
+    ((t.ConstMult t.Monomial t.NonMonomial) t.D) =
+        ((<NegConstNumber t.ConstMult> t.Monomial t.NonMonomial) t.D);
+}
+
+SimpleExpression
+{
+    (e.Result) (Plus t.Expr t.Expr_2) =
+        <SimpleExpression (<SimpleExpr_2 t.Expr_2> e.Result) t.Expr>;
+
+    (e.Result) (Minus t.Expr t.Expr_2) =
+        <SimpleExpression
+        (<SimpleExpr_2_NegConst <SimpleExpr_2 t.Expr_2>> e.Result)
+        t.Expr>;
+
+    (e.Result) t.Expr_2 = (<SimpleExpr_2 t.Expr_2> e.Result);
+
+    t.Expr = <SimpleExpression () t.Expr>;
+}
+
+* t.N is numerator.
+* t.D is denominator.
+SimpleExpr_2
+{
+    (t.N t.D) (Mul t.Expr_2 t.Expr_1) =
+        <SimpleExpr_2
+            (<SimpleSummand t.N <SimpleExpr_1 t.Expr_1>> t.D)
+            t.Expr_2
+        >;
+
+    (t.N t.D) (Div t.Expr_2 t.Expr_1) =
+        <SimpleExpr_2
+            (t.N <SimpleSummand t.D <SimpleExpr_1 t.Expr_1>>)
+            t.Expr_2
+        >;
+
+    (t.N t.D) t.Expr_1 =
+        (<SimpleSummand t.N <SimpleExpr_1 t.Expr_1>> t.D);
+
+    t.Expr_2 = <SimpleExpr_2 ((1 () ()) (1 () ())) t.Expr_2>;
+}
+
+MulConst_SimpleExpr_0
+{
+    (MonadicMinus s.ConstMultAbs) s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        (MonadicMinus <Mul (s.ConstMultAbs) s.Macrodigit>);
+
+    s.ConstMult s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        <Mul (s.ConstMult) s.Macrodigit>;
+
+    t.ConstMult t.SimpleExpr_0 = t.ConstMult;
+}
+
+MulMonomial_SimpleExpr_0
+{
+    (e.X (s.Variable t.ConstPower_1) e.Y) (s.Variable t.ConstPower_2),
+    <IsVariable s.Variable> : True =
+        (e.X
+        (s.Variable <AddConstNumber (t.ConstPower_1) t.ConstPower_2>)
+        e.Y);
+
+    (e.X) (s.Variable t.ConstPower),
+    <IsVariable s.Variable> : True =
+        ((s.Variable t.ConstPower) e.X);
+
+    t.Monomial t.SimpleExpr_0 = t.Monomial;
+}
+
+IsVarPower
+{
+    (s.Variable t.ConstPower),
+    <IsVariable s.Variable> : True,
+    <IsConstNumber t.ConstPower> : True =
+        True;
+
+    t.Any = False;
+}
+
+MulNonMonomial_SimpleExpr_0
+{
+    (e.X) t.SimpleExpr_0,
+    <IsConstNumber t.SimpleExpr_0> : False,
+    <IsVarPower t.SimpleExpr_0> : False =
+        (t.SimpleExpr_0 e.X);
+
+    t.NonMonomial t.SimpleExpr_0 = t.NonMonomial;
+}
+
+SimpleSummand
+{
+    (t.ConstMult t.Monomial t.NonMonomial) t.SimpleExpr_1,
+    t.SimpleExpr_1 : (MonadicMinus t.SimpleExpr_0) =
+        <SimpleSummand
+            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomial)
+            t.SimpleExpr_0
+        >;
+
+    (t.ConstMult t.Monomial t.NonMonomial) t.SimpleExpr_0 =
+        (<MulConst_SimpleExpr_0 t.ConstMult t.SimpleExpr_0>
+        <MulMonomial_SimpleExpr_0 t.Monomial t.SimpleExpr_0>
+        <MulNonMonomial_SimpleExpr_0 t.NonMonomial t.SimpleExpr_0>);
+}
+
+SimpleExpr_1
+{
+    (MonadicMinus (MonadicMinus t.Expr_1)) =
+        <SimpleExpr_1 t.Expr_1>;
+
+    (MonadicMinus t.Expr_0) = (MonadicMinus <SimpleExpr_0 t.Expr_0>);
+
+    t.Expr_0 = <SimpleExpr_0 t.Expr_0>;
+}
+
+SimpleExpr_0
+{
+    s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        s.Macrodigit;
+
+    s.Variable,
+    <IsVariable s.Variable> : True =
+        (s.Variable 1);
+
+    /* Only variables, not all expressions. */
+    (Invol s.Variable t.ConstPower),
+    <IsVariable s.Variable> : True =
+        (s.Variable t.ConstPower);
+
+    (Invol t.Expr t.ConstPower) =
+        (Invol <SimpleExpression t.Expr> t.ConstPower);
+
+    (s.FuncName t.Expr),
+    <IsFunctionName s.FuncName> : True =
+        (s.FuncName <SimpleExpression t.Expr>);
+
+    t.Expr =
+        <SimpleExpression t.Expr>;
+}

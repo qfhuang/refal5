@@ -1,0 +1,54 @@
+==== Grammars ====
+
+---- Input expression grammar ----
+
+/* TODO */
+
+---- Internal expression presentation grammar ----
+
+Macrodigit, identifier are internal Refal 5 symbol types.
+
+ConstMult, ConstPower -> (MonadicMinus Macrodigit) | Macrodigit
+
+Number  -> Macrodigit
+Variable -> Identifier // (except function names)
+Invol -> (Invol Expression ConstPower)
+FuncName -> ... // see Utils.ref FuncNamesSet
+Function -> (FuncName Expression) 
+Expr_0 -> Number | Variable | Invol | Function | Expression
+Expr_1 -> (MonadicMinus Expr_1) | Expr_0
+Expr_2 -> (Mul Expr_2 Expr_1) | (Div Expr_2 Expr_1) | Expr_1
+Expression -> (Plus Expression Expr_2) | (Minus Expression Expr_2) | Expr_2
+
+---- Internal simple expression presentation grammar ----
+
+ConstMult, ConstPower -> (MonadicMinus Macrodigit) | Macrodigit
+VarPower -> (Variable ConstPower)
+SimpleFunction -> (FuncName SimpleExpression) 
+
+SimpleExpr_0 -> Macrodigit | VarPower | Invol | SimpleFunction |
+                SimpleExpression
+SimpleExpr_1 -> (MonadicMinus SimpleExpr_0) | SimpleExpr_0
+
+// Monomial — not contain function names
+Monomial -> ({VarPower}) // product of VarPower
+
+NonMnomialEntry -> (Invol SimpleExpression) | SimpleFunction | SimpleExpression
+NonMonomial -> ({NonMonomialEntry}) // product of NonMonomialEntry
+
+SimpleSummand -> (ConstMult Monomial NonMonomial)
+
+SimpleExpr_2 -> (SimpleSummand SimpleSummand) // numerator and demoninator
+SimpleExpression -> ({SimpleExpr_2}) // summa of SimpleExpr_2
+
+---- TODO (maybe) ----
+
+{Something} is iteration of something (several something presence).
+
+Fraction -> Summa Summa // numerator and denominator
+Summa -> ({Summand})
+Summand -> (ConstMult Monomial NonMonomial)
+FunctionMult -> (Plus {Function}) | (Minus {Function}) // product of Function
+Function -> (FuncName Fraction)
+
+// vim: set ft=asciidoc:

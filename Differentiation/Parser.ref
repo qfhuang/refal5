@@ -1,32 +1,41 @@
 $EXTERNAL Lex;
-$EXTERNAL FuncNamesSet;
 $EXTERNAL Contain;
 $EXTERNAL IsVariable;
 $EXTERNAL IsMacrodigit;
+$EXTERNAL IsFunctionName;
 
 $ENTRY Parse
 {
-    'D' e.InVar ':' e.InExpr,
-    <Variable   <Lex e.InVar>>  : t.OutVar,
-    <Expression <Lex e.InExpr>> : t.OutExpr =
+    s.D1 e.InExpr '/' s.D2 e.InVar,
+    <Contain ('Dd') s.D1> : True,
+    <Contain ('Dd') s.D2> : True,
+    <Expression <Lex e.InExpr>> : t.OutExpr,
+    <Variable   <Lex e.InVar>>  : t.OutVar =
         (t.OutVar) t.OutExpr;
 
+    e.InExpr,
+    <Expression <Lex e.InExpr>> : t.OutExpr =
+        t.OutExpr;
+ 
     e.X =;
 }
 
-/* TODO: recursive processing expression e.g. "---5", necessary? */
-SNumber
+ConstPower
 {
     s.Macrodigit,
     <IsMacrodigit s.Macrodigit> : True =
         s.Macrodigit;
 
-    Plus s.Macrodigit,
-    <IsMacrodigit s.Macrodigit> : True =
+    Plus e.InConstPower,
+    <ConstPower e.InConstPower> : t.OutConstPower =
+        t.OutConstPower;
+
+    Minus e.InConstPower,
+    <ConstPower e.InConstPower> : (MonadicMinus s.Macrodigit) =
         s.Macrodigit;
 
-    Minus s.Macrodigit,
-    <IsMacrodigit s.Macrodigit> : True =
+    Minus e.InConstPower,
+    <ConstPower e.InConstPower> : s.Macrodigit =
         (MonadicMinus s.Macrodigit);
 
     e.X =;
@@ -52,10 +61,10 @@ Variable
 
 Invol
 {
-    e.InExpr Invol e.InSNumber,
+    e.InExpr Invol e.InConstPower,
     <Expression e.InExpr> : t.OutExpr,
-    <SNumber e.InSNumber> : t.OutSNumber =
-        (Invol t.OutExpr t.OutSNumber);
+    <ConstPower e.InConstPower> : t.OutConstPower =
+        (Invol t.OutExpr t.OutConstPower);
 
     e.X =;
 }
@@ -63,7 +72,7 @@ Invol
 Function
 {
     t.FuncName '(' e.InExpr ')',
-    <Contain (<FuncNamesSet>) t.FuncName> : True,
+    <IsFunctionName t.FuncName> : True,
     <Expression e.InExpr> : t.OutExpr =
         (t.FuncName t.OutExpr);
 

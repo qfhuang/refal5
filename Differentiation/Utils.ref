@@ -1,9 +1,9 @@
-$ENTRY AllFuncNamesSet
+AllFuncNamesSet
 {
     = <FuncNamesSet> Plus Minus Mul Div Invol
 }
 
-$ENTRY FuncNamesSet
+FuncNamesSet
 {
     = sin cos ln exp sqrt arcsin arccos;
 }
@@ -23,9 +23,63 @@ $ENTRY IsVariable
     t.X = False;
 }
 
+$ENTRY IsFunctionName
+{
+    s.FuncName = <Contain (<FuncNamesSet>) s.FuncName>;
+
+    t.X = False;
+}
+
 * <Contain (Set) Symbols>.
 $ENTRY Contain
 {
     (e.1 s.X e.2) e.3 s.X e.4 = True;
     (e.1) e.2                 = False;
+}
+
+$ENTRY IsConstNumber
+{
+    (MonadicMinus s.Macrodigit),
+    <IsMacrodigit s.Macrodigit> : True =
+        True;
+
+    s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        True;
+
+    t.Any = False;
+}
+
+ConstNumberToStd
+{
+    (MonadicMinus s.Macrodigit) = '-' s.Macrodigit;
+    s.Macrodigit = s.Macrodigit;
+}
+
+StdToConstNumber
+{
+    '-' s.Macrodigit = (MonadicMinus s.Macrodigit);
+    s.Macrodigit = s.Macrodigit;
+}
+
+* First arg: Macrodigit or (MonadicMinus Macrodigit).
+* Second arg: Macrogidit or (MonadicMinus Macrodigit).
+$ENTRY SubConstNumber
+{
+    (t.ConstNumber_1) t.ConstNumber_2 =
+        <StdToConstNumber <Sub
+            (<ConstNumberToStd t.ConstNumber_1>)
+            <ConstNumberToStd t.ConstNumber_2>
+        >>;
+}
+
+* First arg: Macrodigit or (MonadicMinus Macrodigit).
+* Second arg: Macrogidit or (MonadicMinus Macrodigit).
+$ENTRY AddConstNumber
+{
+    (t.ConstNumber_1) t.ConstNumber_2 =
+        <StdToConstNumber <Add
+            (<ConstNumberToStd t.ConstNumber_1>)
+            <ConstNumberToStd t.ConstNumber_2>
+        >>;
 }
