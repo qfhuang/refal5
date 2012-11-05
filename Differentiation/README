@@ -33,7 +33,8 @@ SimpleExpr_1 -> (MonadicMinus SimpleExpr_0) | SimpleExpr_0
 // Monomial — not contain function names
 Monomial -> ({VarPower}) // product of VarPower
 
-NonMnomialEntry -> (Invol SimpleExpression) | SimpleFunction | SimpleExpression
+NonMonomialEntry -> (Invol SimpleExpression ConstPower) | SimpleFunction |
+                    SimpleExpression
 NonMonomial -> ({NonMonomialEntry}) // product of NonMonomialEntry
 
 SimpleSummand -> (ConstMult Monomial NonMonomial)
