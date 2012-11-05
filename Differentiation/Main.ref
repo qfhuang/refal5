@@ -4,6 +4,7 @@
 $EXTERNAL Parse;
 $EXTERNAL Differentiation;
 $EXTERNAL SimplePresentation;
+$EXTERNAL S12n_SimplePresentation;
 $EXTERNAL FormatSimpleExpression;
 
 $ENTRY Go
@@ -16,6 +17,11 @@ Introduction
     = <Prout 'Input format: "Expression" or "[Dd]Expression/[Dd]Variable".'>;
 }
 
+ResultPreface
+{
+    = ' = ';
+}
+
 Loop
 {
     0   = <Prout 'Exiting...'><Exit 0>; /* EOF */
@@ -23,16 +29,18 @@ Loop
 
     e.In,
     <Parse e.In> : (t.Var) t.Expr =
-        <Prout <FormatSimpleExpression <SimplePresentation
+        <Prout <ResultPreface><FormatSimpleExpression
+        <S12n_SimplePresentation <SimplePresentation
             <Differentiation (t.Var) t.Expr>
-        >>>
+        >>>>
         <Loop <GetInputLine>>;
 
     e.In,
     <Parse e.In> : t.Expr =
-        <Prout <FormatSimpleExpression <SimplePresentation
+        <Prout <ResultPreface><FormatSimpleExpression
+        <S12n_SimplePresentation <SimplePresentation
             t.Expr
-        >>>
+        >>>>
         <Loop <GetInputLine>>;
 
     e.In =

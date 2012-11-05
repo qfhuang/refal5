@@ -1,0 +1,114 @@
+$EXTERNAL IsFunctionName;
+
+$EXTERNAL RemoveZeroPower_Monomial;
+$EXTERNAL RemoveZeroPower_NonMonomial;
+$EXTERNAL RemoveZeroMult_SimpleExpr_2;
+
+* ---- Simplification for simple presentation ----
+
+$ENTRY NoS12n
+{
+    t.X = t.X;
+}
+
+* S12n is abbreviation for "Simplification".
+
+$ENTRY S12n_SimpleExpression
+{
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (e.Processed) (t.SimpleExpr_2 e.X) =
+        <S12n_SimpleExpression
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            (e.Processed <Mu s.S12n_SimpleExpr_2 <S12n_SimpleExpr_2
+                (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+                t.SimpleExpr_2
+            >>) (e.X)
+        >;
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (e.Processed) () =
+        (e.Processed);
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    t.SimpleExpr =
+        <S12n_SimpleExpression
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            ()
+            t.SimpleExpr
+        >;
+}
+
+S12n_SimpleExpr_2
+{
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    ((t.ConstMult_1 t.Monomial_1 t.NonMonomial_1)
+    (t.ConstMult_2 t.Monomial_2 t.NonMonomial_2)) =
+        (
+            (
+                t.ConstMult_1
+                <Mu s.S12n_Monomial t.Monomial_1>
+                <Mu s.S12n_NonMonomial <S12n_NonMonomial
+                    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+                    t.NonMonomial_1
+                >>
+            )
+            (
+                t.ConstMult_2
+                <Mu s.S12n_Monomial t.Monomial_2>
+                <Mu s.S12n_NonMonomial <S12n_NonMonomial
+                    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+                    t.NonMonomial_2
+                >>
+            )
+        );
+}
+
+S12n_NonMonomial
+{
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (e.Processed) (t.NonMonomialEntry e.X) =
+        <S12n_NonMonomial
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            (e.Processed <S12n_NonMonomialEntry
+                (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+                t.NonMonomialEntry
+            >) (e.X)
+        >;
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (e.Processed) () =
+        (e.Processed);
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    t.NonMonomial =
+        <S12n_NonMonomial
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            ()
+            t.NonMonomial
+        >;
+}
+
+S12n_NonMonomialEntry
+{
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (Invol t.SimpleExpr t.ConstPower) =
+        (Invol <S12n_SimpleExpression
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            t.SimpleExpr
+        > t.ConstPower);
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    (s.FuncName t.SimpleExpr),
+    <IsFunctionName s.FuncName> : True =
+        (s.FuncName <S12n_SimpleExpression
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            t.SimpleExpr
+        >);
+
+    (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+    t.SimpleExpr = 
+        <S12n_SimpleExpression
+            (s.S12n_SimpleExpr_2 s.S12n_Monomial s.S12n_NonMonomial)
+            t.SimpleExpr
+        >;
+}

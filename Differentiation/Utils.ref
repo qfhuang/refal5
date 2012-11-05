@@ -37,6 +37,12 @@ $ENTRY Contain
     (e.1) e.2                 = False;
 }
 
+$ENTRY IsNothing
+{
+    = True;
+    e.X = False;
+}
+
 $ENTRY IsConstNumber
 {
     (MonadicMinus s.Macrodigit),

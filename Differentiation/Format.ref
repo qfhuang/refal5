@@ -4,6 +4,13 @@ $EXTERNAL IsFunctionName;
 
 $ENTRY FormatSimpleExpression
 {
+    () = '0';
+
+    t.SimpleExpr = <FormatSimpleExpressionInternal t.SimpleExpr>;
+}
+
+FormatSimpleExpressionInternal
+{
     (t.SimpleExpr_2_1 t.SimpleExpr_2_2 e.X) =
         <FormatSimpleExpr_2 t.SimpleExpr_2_1> '+'
         <FormatSimpleExpression (t.SimpleExpr_2_2 e.X)>;

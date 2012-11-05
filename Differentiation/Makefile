@@ -2,13 +2,14 @@ MODULES = \
 	Main.rsl \
 	Format.rsl \
 	Simplification.rsl \
+	SimplificationCommon.rsl \
 	SimplePresentation.rsl \
 	Differentiation.rsl \
 	Parser.rsl \
 	Utils.rsl \
 	Lexer.rsl
 
-RUN = Main+Format+Simplification+SimplePresentation+Differentiation+Parser+Utils+Lexer
+RUN = Main+Format+Simplification+SimplificationCommon+SimplePresentation+Differentiation+Parser+Utils+Lexer
 
 default: run
 

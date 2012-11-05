@@ -1,7 +1,103 @@
-* ---- Simple presentation ----
+$EXTERNAL Contain;
+$EXTERNAL IsNothing;
+$EXTERNAL IsVariable;
+$EXTERNAL FormatSimpleExpression;
+$EXTERNAL NoS12n;
+$EXTERNAL S12n_SimpleExpression;
 
-$ENTRY SimplePrSimplification
+$ENTRY S12n_SimplePresentation
 {
-    /* TODO */
+    t.SimpleExpr =
+        <S12n_SimplePresentation_Internal
+            (
+                (
+                    NoS12n
+                    RemoveZeroPower_Monomial
+                    RemoveZeroPower_NonMonomial
+                )
+
+                (
+                    RemoveZeroMult_SimpleExpr_2
+                    NoS12n
+                    NoS12n
+                )
+            )
+
+            t.SimpleExpr
+        >;
+
     e.X =;
+}
+
+S12n_SimplePresentation_Internal
+{
+    (t.S12n_Functions e.X) t.SimpleExpr =
+        <S12n_SimplePresentation_Internal
+            (e.X)
+            <S12n_SimpleExpression
+                t.S12n_Functions
+                t.SimpleExpr
+            >
+        >;
+
+    () t.SimpleExpr = t.SimpleExpr;
+}
+
+$ENTRY RemoveZeroMult_SimpleExpr_2
+{
+    ((0 t.Monomial_1 t.NonMonomial_1)
+    (t.ConstMult_2 t.Monomial_2 t.NonMonomial_2)),
+    <Contain (0) t.ConstMult_2> : False =;
+
+    t.X = t.X;
+}
+
+FormatSomething
+{
+    s.Variable,
+    <IsVariable s.Variable> : True =
+        <Explode s.Variable>;
+
+    t.Something,
+    <FormatSimpleExpression t.Something> : e.Formatted,
+    <IsNothing e.Formatted> : False =
+        e.Formatted;
+}
+
+/* TODO: move Prout to Main.ref */
+/* TODO: maybe interactive ask user, use restriction or not? */
+AddRestriction
+{
+    t.Something =
+        <Prout
+            'Restriction: '
+            <FormatSomething t.Something>
+            ' != ' '0'
+        >;
+}
+
+$ENTRY RemoveZeroPower_Monomial
+{
+    (e.X (s.Variable 0) e.Y) =
+        <AddRestriction s.Variable>
+        <RemoveZeroPower_Monomial (e.X e.Y)>;
+
+    t.Monomial = t.Monomial;
+}
+
+IsObviousZeroSimpleExpr
+{
+    (((0 t.Monomial t.NonMonomial) t.Denumerator)) = True;
+
+    e.X = False;
+}
+
+$ENTRY RemoveZeroPower_NonMonomial
+{
+    (e.X (Invol t.SimpleExpr 0) e.Y),
+    <IsObviousZeroSimpleExpr t.SimpleExpr> : False =
+        <AddRestriction t.SimpleExpr>
+        <RemoveZeroPower_NonMonomial (e.X e.Y)>;
+
+    t.NonMonomial = t.NonMonomial;
 }
