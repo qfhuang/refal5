@@ -68,6 +68,14 @@ StdToConstNumber
     s.Macrodigit = s.Macrodigit;
 }
 
+* Arg: Macrogidit or (MonadicMinus Macrodigit).
+$ENTRY NegConstNumber
+{
+    0 = 0;
+    (MonadicMinus s.Macrodigit) = s.Macrodigit;
+    s.Macrodigit = (MonadicMinus s.Macrodigit);
+}
+
 * First arg: Macrodigit or (MonadicMinus Macrodigit).
 * Second arg: Macrogidit or (MonadicMinus Macrodigit).
 $ENTRY SubConstNumber

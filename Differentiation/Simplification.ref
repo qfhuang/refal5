@@ -1,7 +1,7 @@
 $EXTERNAL Contain;
 $EXTERNAL IsNothing;
 $EXTERNAL IsVariable;
-$EXTERNAL FormatSimpleExpression;
+$EXTERNAL FormatTopLevelSimpleExpression;
 $EXTERNAL NoS12n;
 $EXTERNAL S12n_SimpleExpression;
 
@@ -13,11 +13,11 @@ $ENTRY S12n_SimplePresentation
                 (
                     NoS12n
                     RemoveZeroPower_Monomial
-                    RemoveZeroPower_NonMonomial
+                    RemoveZeroPower_NonMonomialFraction
                 )
 
                 (
-                    RemoveZeroMult_SimpleExpr_2
+                    RemoveZeroMult_SimpleSummand
                     NoS12n
                     NoS12n
                 )
@@ -43,11 +43,10 @@ S12n_SimplePresentation_Internal
     () t.SimpleExpr = t.SimpleExpr;
 }
 
-$ENTRY RemoveZeroMult_SimpleExpr_2
+$ENTRY RemoveZeroMult_SimpleSummand
 {
-    ((0 t.Monomial_1 t.NonMonomial_1)
-    (t.ConstMult_2 t.Monomial_2 t.NonMonomial_2)),
-    <Contain (0) t.ConstMult_2> : False =;
+    ((0 t.D) t.Monomial_1 t.NonMonomial_1),
+    <Contain (0) t.D> : False =;
 
     t.X = t.X;
 }
@@ -59,7 +58,7 @@ FormatSomething
         <Explode s.Variable>;
 
     t.Something,
-    <FormatSimpleExpression t.Something> : e.Formatted,
+    <FormatTopLevelSimpleExpression t.Something> : e.Formatted,
     <IsNothing e.Formatted> : False =
         e.Formatted;
 }
@@ -87,17 +86,23 @@ $ENTRY RemoveZeroPower_Monomial
 
 IsObviousZeroSimpleExpr
 {
-    (((0 t.Monomial t.NonMonomial) t.Denumerator)) = True;
+    (((0 t.D) t.Monomial t.NonMonomial)),
+    <Contain (0) t.D> : False = True;
 
     e.X = False;
 }
 
-$ENTRY RemoveZeroPower_NonMonomial
+$ENTRY RemoveZeroPower_NonMonomialFraction
 {
-    (e.X (Invol t.SimpleExpr 0) e.Y),
+    ((e.X (Invol t.SimpleExpr 0) e.Y) t.D),
     <IsObviousZeroSimpleExpr t.SimpleExpr> : False =
         <AddRestriction t.SimpleExpr>
-        <RemoveZeroPower_NonMonomial (e.X e.Y)>;
+        <RemoveZeroPower_NonMonomialFraction ((e.X e.Y) t.D)>;
+
+    (t.N (e.X (Invol t.SimpleExpr 0) e.Y)),
+    <IsObviousZeroSimpleExpr t.SimpleExpr> : False =
+        <AddRestriction t.SimpleExpr>
+        <RemoveZeroPower_NonMonomialFraction (t.N (e.X e.Y))>;
 
     t.NonMonomial = t.NonMonomial;
 }

@@ -22,25 +22,37 @@ Expression -> (Plus Expression Expr_2) | (Minus Expression Expr_2) | Expr_2
 
 ---- Internal simple expression presentation grammar ----
 
-ConstMult, ConstPower -> (MonadicMinus Macrodigit) | Macrodigit
+// Numerator and denominator.
+ConstMult -> (MonadicMinus Macrodigit Macrodigit) | (Macrodigit Macrodigit)
+
+ConstPower -> (MonadicMinus Macrodigit) | Macrodigit
+
 VarPower -> (Variable ConstPower)
+
 SimpleFunction -> (FuncName SimpleExpression) 
 
 SimpleExpr_0 -> Macrodigit | VarPower | Invol | SimpleFunction |
                 SimpleExpression
+
 SimpleExpr_1 -> (MonadicMinus SimpleExpr_0) | SimpleExpr_0
 
-// Monomial — not contain function names
-Monomial -> ({VarPower}) // product of VarPower
+// Monomial — not contain non monomial entries.
+// product of VarPower
+Monomial -> ({VarPower}) | ()
 
 NonMonomialEntry -> (Invol SimpleExpression ConstPower) | SimpleFunction |
                     SimpleExpression
-NonMonomial -> ({NonMonomialEntry}) // product of NonMonomialEntry
 
-SimpleSummand -> (ConstMult Monomial NonMonomial)
+// product of NonMonomialEntry
+NonMonomial -> ({NonMonomialEntry}) | ()
 
-SimpleExpr_2 -> (SimpleSummand SimpleSummand) // numerator and demoninator
-SimpleExpression -> ({SimpleExpr_2}) // summa of SimpleExpr_2
+// Numerator and denominator.
+NonMonomialFraction -> (NonMonomial NonMonomial)
+
+SimpleSummand -> (ConstMult Monomial NonMonomialFraction)
+
+// Summa of SimpleSummand.
+SimpleExpression -> ({SimpleSummand})
 
 ---- TODO (maybe) ----
 

@@ -2,6 +2,8 @@ $EXTERNAL IsMacrodigit;
 $EXTERNAL IsVariable;
 $EXTERNAL IsFunctionName;
 $EXTERNAL IsConstNumber;
+$EXTERNAL NegConstNumber;
+$EXTERNAL SubConstNumber;
 $EXTERNAL AddConstNumber;
 $EXTERNAL Contain;
 
@@ -12,67 +14,76 @@ $ENTRY SimplePresentation
     e.X =;
 }
 
-NegConstNumber
+* s.N is numerator.
+* s.D is denominator.
+NegConstMult
 {
-    0 = 0;
-    (MonadicMinus s.Macrodigit) = s.Macrodigit;
-    s.Macrodigit = (MonadicMinus s.Macrodigit);
+    (0 s.D) = (0 s.D);
+    (MonadicMinus s.N s.D) = (s.N s.D);
+    (s.N s.D) = (MonadicMinus s.N s.D);
 }
 
-SimpleExpr_2_NegConst
+$ENTRY NegSimpleSummand
 {
-    ((t.ConstMult t.Monomial t.NonMonomial) t.D) =
-        ((<NegConstNumber t.ConstMult> t.Monomial t.NonMonomial) t.D);
+    (t.ConstMult t.Monomial t.NonMonomialFrac) =
+        (<NegConstMult t.ConstMult> t.Monomial t.NonMonomialFrac);
 }
 
 SimpleExpression
 {
     (e.Result) (Plus t.Expr t.Expr_2) =
-        <SimpleExpression (<SimpleExpr_2 t.Expr_2> e.Result) t.Expr>;
+        <SimpleExpression (<SimpleSummand t.Expr_2> e.Result) t.Expr>;
 
     (e.Result) (Minus t.Expr t.Expr_2) =
         <SimpleExpression
-        (<SimpleExpr_2_NegConst <SimpleExpr_2 t.Expr_2>> e.Result)
+        (<NegSimpleSummand <SimpleSummand t.Expr_2>> e.Result)
         t.Expr>;
 
-    (e.Result) t.Expr_2 = (<SimpleExpr_2 t.Expr_2> e.Result);
+    (e.Result) t.Expr_2 = (<SimpleSummand t.Expr_2> e.Result);
 
     t.Expr = <SimpleExpression () t.Expr>;
 }
 
-* t.N is numerator.
-* t.D is denominator.
-SimpleExpr_2
+SimpleSummand
 {
-    (t.N t.D) (Mul t.Expr_2 t.Expr_1) =
-        <SimpleExpr_2
-            (<SimpleSummand t.N <SimpleExpr_1 t.Expr_1>> t.D)
+    t.Summand (Mul t.Expr_2 t.Expr_1) =
+        <SimpleSummand
+            <SimpleSummandMul t.Summand <SimpleExpr_1 t.Expr_1>>
             t.Expr_2
         >;
 
-    (t.N t.D) (Div t.Expr_2 t.Expr_1) =
-        <SimpleExpr_2
-            (t.N <SimpleSummand t.D <SimpleExpr_1 t.Expr_1>>)
+    t.Summand (Div t.Expr_2 t.Expr_1) =
+        <SimpleSummand
+            <SimpleSummandDiv t.Summand <SimpleExpr_1 t.Expr_1>>
             t.Expr_2
         >;
 
-    (t.N t.D) t.Expr_1 =
-        (<SimpleSummand t.N <SimpleExpr_1 t.Expr_1>> t.D);
+    t.Summand t.Expr_1 =
+        <SimpleSummandMul t.Summand <SimpleExpr_1 t.Expr_1>>;
 
-    t.Expr_2 = <SimpleExpr_2 ((1 () ()) (1 () ())) t.Expr_2>;
+    t.Expr_2 = <SimpleSummand ((1 1) () (() ())) t.Expr_2>;
 }
 
-MulConst_SimpleExpr_0
+MulConstMult_SimpleExpr_0
 {
-    (MonadicMinus s.ConstMultAbs) s.Macrodigit,
-    <IsMacrodigit s.Macrodigit> : True =
-        (MonadicMinus <Mul (s.ConstMultAbs) s.Macrodigit>);
+    (MonadicMinus s.N1 s.D1) (s.N2 s.D2),
+    <IsMacrodigit s.N2> : True,
+    <IsMacrodigit s.D2> : True =
+        (MonadicMinus
+            <Mul (s.N1) s.N2>
+            <Mul (s.D1) s.D2>
+        );
 
-    s.ConstMult s.Macrodigit,
-    <IsMacrodigit s.Macrodigit> : True =
-        <Mul (s.ConstMult) s.Macrodigit>;
+    (s.N1 s.D1) (s.N2 s.D2),
+    <IsMacrodigit s.N2> : True,
+    <IsMacrodigit s.D2> : True =
+        (
+            <Mul (s.N1) s.N2>
+            <Mul (s.D1) s.D2>
+        );
 
-    t.ConstMult t.SimpleExpr_0 = t.ConstMult;
+    t.ConstMult t.SimpleExpr_0 =
+        t.ConstMult;
 }
 
 MulMonomial_SimpleExpr_0
@@ -86,6 +97,21 @@ MulMonomial_SimpleExpr_0
     (e.X) (s.Variable t.ConstPower),
     <IsVariable s.Variable> : True =
         ((s.Variable t.ConstPower) e.X);
+
+    t.Monomial t.SimpleExpr_0 = t.Monomial;
+}
+
+DivMonomial_SimpleExpr_0
+{
+    (e.X (s.Variable t.ConstPower_1) e.Y) (s.Variable t.ConstPower_2),
+    <IsVariable s.Variable> : True =
+        (e.X
+        (s.Variable <SubConstNumber (t.ConstPower_1) t.ConstPower_2>)
+        e.Y);
+
+    (e.X) (s.Variable t.ConstPower),
+    <IsVariable s.Variable> : True =
+        ((s.Variable <NegConstNumber t.ConstPower>) e.X);
 
     t.Monomial t.SimpleExpr_0 = t.Monomial;
 }
@@ -110,19 +136,65 @@ MulNonMonomial_SimpleExpr_0
     t.NonMonomial t.SimpleExpr_0 = t.NonMonomial;
 }
 
-SimpleSummand
+MulNonMonomialFraction_SimpleExpr_0
 {
-    (t.ConstMult t.Monomial t.NonMonomial) t.SimpleExpr_1,
+    (t.N1 t.D1) (t.N2 t.D2) =
+        (
+            <MulNonMonomial_SimpleExpr_0 t.N1 t.N2>
+            <MulNonMonomial_SimpleExpr_0 t.D1 t.D2>
+        );
+}
+
+SimpleSummandMul
+{
+    (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_1,
     t.SimpleExpr_1 : (MonadicMinus t.SimpleExpr_0) =
-        <SimpleSummand
-            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomial)
+        <SimpleSummandMul
+            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomialFrac)
             t.SimpleExpr_0
         >;
 
-    (t.ConstMult t.Monomial t.NonMonomial) t.SimpleExpr_0 =
-        (<MulConst_SimpleExpr_0 t.ConstMult t.SimpleExpr_0>
-        <MulMonomial_SimpleExpr_0 t.Monomial t.SimpleExpr_0>
-        <MulNonMonomial_SimpleExpr_0 t.NonMonomial t.SimpleExpr_0>);
+    (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_0 =
+        (
+            <MulConstMult_SimpleExpr_0
+                t.ConstMult
+                (t.SimpleExpr_0 1)
+            >
+            <MulMonomial_SimpleExpr_0
+                t.Monomial
+                t.SimpleExpr_0
+            >
+            <MulNonMonomialFraction_SimpleExpr_0
+                t.NonMonomialFrac
+                (t.SimpleExpr_0 1)
+            >
+        );
+}
+
+SimpleSummandDiv
+{
+    (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_1,
+    t.SimpleExpr_1 : (MonadicMinus t.SimpleExpr_0) =
+        <SimpleSummandDiv
+            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomialFrac)
+            t.SimpleExpr_0
+        >;
+
+    (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_0 =
+        (
+            <MulConstMult_SimpleExpr_0
+                t.ConstMult
+                (1 t.SimpleExpr_0)
+            >
+            <DivMonomial_SimpleExpr_0
+                t.Monomial
+                t.SimpleExpr_0
+            >
+            <MulNonMonomialFraction_SimpleExpr_0
+                t.NonMonomialFrac
+                (1 t.SimpleExpr_0)
+            >
+        );
 }
 
 SimpleExpr_1

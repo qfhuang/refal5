@@ -5,7 +5,7 @@ $EXTERNAL Parse;
 $EXTERNAL Differentiation;
 $EXTERNAL SimplePresentation;
 $EXTERNAL S12n_SimplePresentation;
-$EXTERNAL FormatSimpleExpression;
+$EXTERNAL FormatTopLevelSimpleExpression;
 
 $ENTRY Go
 {
@@ -29,7 +29,7 @@ Loop
 
     e.In,
     <Parse e.In> : (t.Var) t.Expr =
-        <Prout <ResultPreface><FormatSimpleExpression
+        <Prout <ResultPreface><FormatTopLevelSimpleExpression
         <S12n_SimplePresentation <SimplePresentation
             <Differentiation (t.Var) t.Expr>
         >>>>
@@ -37,7 +37,7 @@ Loop
 
     e.In,
     <Parse e.In> : t.Expr =
-        <Prout <ResultPreface><FormatSimpleExpression
+        <Prout <ResultPreface><FormatTopLevelSimpleExpression
         <S12n_SimplePresentation <SimplePresentation
             t.Expr
         >>>>
