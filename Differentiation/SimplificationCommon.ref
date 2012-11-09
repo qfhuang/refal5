@@ -2,7 +2,8 @@ $EXTERNAL IsFunctionName;
 
 $EXTERNAL RemoveZeroPower_Monomial;
 $EXTERNAL RemoveZeroPower_NonMonomialFraction;
-$EXTERNAL RemoveZeroMult_SimpleSummand;
+$EXTERNAL SearchZeroMult_SimpleSummand;
+$EXTERNAL RemoveOnenessPower_NonMonomialFraction;
 
 * ---- Simplification for simple presentation ----
 

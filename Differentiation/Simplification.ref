@@ -17,9 +17,15 @@ $ENTRY S12n_SimplePresentation
                 )
 
                 (
-                    RemoveZeroMult_SimpleSummand
+                    SearchZeroMult_SimpleSummand
                     NoS12n
                     NoS12n
+                )
+
+                (
+                    NoS12n
+                    NoS12n
+                    RemoveOnenessPower_NonMonomialFraction
                 )
             )
 
@@ -43,7 +49,7 @@ S12n_SimplePresentation_Internal
     () t.SimpleExpr = t.SimpleExpr;
 }
 
-$ENTRY RemoveZeroMult_SimpleSummand
+$ENTRY SearchZeroMult_SimpleSummand
 {
     ((0 t.D) t.Monomial_1 t.NonMonomial_1),
     <Contain (0) t.D> : False =;
@@ -104,5 +110,20 @@ $ENTRY RemoveZeroPower_NonMonomialFraction
         <AddRestriction t.SimpleExpr>
         <RemoveZeroPower_NonMonomialFraction (t.N (e.X e.Y))>;
 
-    t.NonMonomial = t.NonMonomial;
+    t.NonMonomialFrac = t.NonMonomialFrac;
+}
+
+$ENTRY RemoveOnenessPower_NonMonomialFraction
+{
+    ((e.X (Invol t.SimpleExpr 1) e.Y) t.D) =
+        <RemoveOnenessPower_NonMonomialFraction
+            ((e.X t.SimpleExpr e.Y) t.D)
+        >;
+
+    (t.N (e.X (Invol t.SimpleExpr 1) e.Y)) =
+        <RemoveOnenessPower_NonMonomialFraction
+            (t.N (e.X t.SimpleExpr e.Y))
+        >;
+
+    t.NonMonomialFrac = t.NonMonomialFrac;
 }
