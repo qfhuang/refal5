@@ -144,25 +144,14 @@ SplitMonomial
 
 FormatMonomial
 {
+    (t.VarPower_1 t.VarPower_2 e.X) =
+        <FormatVarPower t.VarPower_1> '*'
+        <FormatMonomial (t.VarPower_2 e.X)>;
+
     (t.VarPower) =
         <FormatVarPower t.VarPower>;
 
     () = '1';
-
-    t.Monomial =
-        '(' <FormatMonomial_Internal t.Monomial> ')';
-}
-
-FormatMonomial_Internal
-{
-    (t.VarPower_1 t.VarPower_2 e.X) =
-        <FormatVarPower t.VarPower_1> '*'
-        <FormatMonomial_Internal (t.VarPower_2 e.X)>;
-
-    (t.VarPower) =
-        <FormatVarPower t.VarPower>;
-
-    () =;
 }
 
 FormatNonMonomialEntry
@@ -184,25 +173,14 @@ FormatNonMonomialEntry
 
 FormatNonMonomial
 {
-    (t.SimpleFunc) = 
-        <FormatNonMonomialEntry t.SimpleFunc>;
+    (t.NMEntry_1 t.NMEntry_2 e.X) =
+        <FormatNonMonomialEntry t.NMEntry_1> '*'
+        <FormatNonMonomial (t.NMEntry_2 e.X)>;
+
+    (t.NMEntry) =
+        <FormatNonMonomialEntry t.NMEntry>;
 
     () = '1';
-
-    t.NonMonomial =
-        '(' <FormatNonMonomial_Internal t.NonMonomial> ')';
-}
-
-FormatNonMonomial_Internal
-{
-    (t.SimpleFunc_1 t.SimpleFunc_2 e.X) =
-        <FormatNonMonomialEntry t.SimpleFunc_1> '*'
-        <FormatNonMonomial (t.SimpleFunc_2 e.X)>;
-
-    (t.SimpleFunc) =
-        <FormatNonMonomialEntry t.SimpleFunc>;
-
-    () =;
 }
 
 FormatSummandFractionEntry
