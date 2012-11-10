@@ -37,13 +37,13 @@ SimpleExpr_0 -> Macrodigit | VarPower | Invol | SimpleFunction |
 SimpleExpr_1 -> (MonadicMinus SimpleExpr_0) | SimpleExpr_0
 
 // Monomial — not contain non monomial entries.
-// product of VarPower
+// Product of VarPower.
 Monomial -> ({VarPower}) | ()
 
 NonMonomialEntry -> (Invol SimpleExpression ConstPower) | SimpleFunction |
                     SimpleExpression
 
-// product of NonMonomialEntry
+// Product of NonMonomialEntry.
 NonMonomial -> ({NonMonomialEntry}) | ()
 
 // Numerator and denominator.
