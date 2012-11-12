@@ -1,0 +1,7 @@
+x
+dx/dx
+dsin(x)/dx
+dcos(x/y)^2/dx
+d1/2*cos(x)^2/dx
+51*sqrt(x)/3 + 5 - 1
+dx*sin(x)*1/2*cos(x)^2/dx

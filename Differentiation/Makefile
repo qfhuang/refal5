@@ -16,8 +16,14 @@ default: run
 %.rsl: %.ref
 	refc $<
 
-run: $(MODULES)
+modules: $(MODULES)
+
+run: modules
 	refgo $(RUN)
 
 clean:
 	rm -f *.rsl *.lis
+
+tests:
+	cat tests.txt
+	$(MAKE) run < tests.txt

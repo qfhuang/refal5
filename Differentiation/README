@@ -1,3 +1,31 @@
+==== Build, run, tests ====
+
+Build *.rsl modules: `make modules`.
+Build *.rsl and run (interactive): `make` or `make run`.
+Build *.rsl and run tests: `make tests`.
+
+Tests reads from tests.txt (one expression at line).
+
+---- Without make ----
+
+Build:
+
+refc Main.ref
+refc Format.ref
+refc Simplification.ref
+refc SimplificationCommon.ref
+refc SimplePresentation.ref
+refc Differentiation.ref
+refc Parser.ref
+refc Utils.ref
+refc Lexer.ref
+
+Run interactive: `refgo `grep '^RUN = ' Makefile | sed -e 's/^RUN = //'`` or
+`refgo Main+Format+Simplification+SimplificationCommon+SimplePresentation+
+Differentiation+Parser+Utils+Lexer` (yes, this is one line).
+
+For run tests, put tests.txt to the standart input of `refgo ...`.
+
 ==== Grammars ====
 
 ---- Input expression grammar ----
