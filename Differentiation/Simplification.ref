@@ -1,6 +1,8 @@
 $EXTERNAL Contain;
 $EXTERNAL IsNothing;
 $EXTERNAL IsVariable;
+$EXTERNAL IsFunctionName;
+$EXTERNAL SubConstNumber;
 $EXTERNAL FormatTopLevelSimpleExpression;
 $EXTERNAL NoS12n;
 $EXTERNAL S12n_SimpleExpression;
@@ -27,7 +29,7 @@ S12n_Set
             )
 
             (
-                SearchZeroMult_SimpleSummand
+                SearchZeroMult_SimpleExpression
                 NoS12n
                 NoS12n
             )
@@ -37,7 +39,13 @@ S12n_Set
                 NoS12n
                 RemoveOnenessPower_NonMonomialFraction
             )
-        )
+
+            (
+                NoS12n
+                NoS12n
+                FractionCancellation_NonMonomialFraction
+            )
+        );
 }
 
 S12n_Set_MakeSequentially
@@ -54,14 +62,7 @@ S12n_Set_MakeSequentially
     () t.SimpleExpr = t.SimpleExpr;
 }
 
-$ENTRY SearchZeroMult_SimpleSummand
-{
-    ((0 t.D) t.Monomial_1 t.NonMonomial_1),
-    <Contain (0) t.D> : False =;
-
-    t.X = t.X;
-}
-
+* For Variable or SimpleExpression.
 FormatSomething
 {
     s.Variable,
@@ -86,6 +87,24 @@ AddRestriction
         >;
 }
 
+AddNegativePowerMonomialRestriction
+{
+    (e.X (s.Variable t.ConstPower) e.Y),
+    t.ConstPower : (MonadicMinus s.PowerAbs) =
+        <AddRestriction s.Variable>
+        <AddNegativePowerMonomialRestriction (e.X e.Y)>;
+
+    (e.X) =;
+}
+
+AddDenominatorRestriction_SimpleSummand
+{
+    (t.ConstMult t.Monomial (t.N t.D)),
+    (((1 1) () (t.D ()))) : t.DenomAsSimpleExpr =
+        <AddNegativePowerMonomialRestriction t.Monomial>
+        <AddRestriction t.DenomAsSimpleExpr>;
+}
+
 $ENTRY RemoveZeroPower_Monomial
 {
     (e.X (s.Variable 0) e.Y) =
@@ -101,6 +120,17 @@ IsObviousZeroSimpleExpr
     <Contain (0) t.D> : False = True;
 
     e.X = False;
+}
+
+$ENTRY SearchZeroMult_SimpleExpression
+{
+    (e.X t.SimpleSummand e.Y),
+    (t.SimpleSummand) : t.SimpleSummandAsExpr,
+    <IsObviousZeroSimpleExpr t.SimpleSummandAsExpr> : True =
+        <AddDenominatorRestriction_SimpleSummand t.SimpleSummand>
+        <SearchZeroMult_SimpleExpression (e.X e.Y)>;
+
+    t.SimpleExpr = t.SimpleExpr;
 }
 
 $ENTRY RemoveZeroPower_NonMonomialFraction
@@ -128,6 +158,153 @@ $ENTRY RemoveOnenessPower_NonMonomialFraction
     (t.N (e.X (Invol t.SimpleExpr 1) e.Y)) =
         <RemoveOnenessPower_NonMonomialFraction
             (t.N (e.X t.SimpleExpr e.Y))
+        >;
+
+    t.NonMonomialFrac = t.NonMonomialFrac;
+}
+
+/* TODO: improve check. */
+IsSimpleExprEqual
+{
+    t.SimpleExpr t.SimpleExpr = True;
+
+    t.SimpleExpr_1 t.SimpleExpr_2 = False;
+}
+
+/* TODO: for reduce the next massive code change:
+ *
+ * NonMonomialEntry ->
+ *     (Invol SimpleExpression ConstPower) |
+ *     SimpleFunction |
+ *     SimpleExpression
+ *
+ * ...to this:
+ *
+ * NonMonomialEntry -> (SimpleExpression ConstPower)
+ *
+ * SimpleFunction changed to (SimpleFuncAsExpression 1).
+ * SimpleExpression changed to (SimpleExpression 1).
+ *
+ * And write code to formatting this presentation. */
+
+$ENTRY FractionCancellation_NonMonomialFraction
+{
+    ((e.A (Invol t.SimpleExpr_1 t.ConstPower_1) e.B)
+    (e.C (Invol t.SimpleExpr_2 t.ConstPower_2) e.D)),
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <FractionCancellation_NonMonomialFraction
+            (
+                (
+                    e.A
+                    (Invol
+                        t.SimpleExpr_1
+                        <SubConstNumber (t.ConstPower_1) t.ConstPower_2>
+                    )
+                    e.B
+                )
+
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A (s.FuncName t.SimpleExpr_1) e.B)
+    (e.C (s.FuncName t.SimpleExpr_2) e.D)),
+    <IsFunctionName s.FuncName> : True,
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True,
+    (((1 1) () (((s.FuncName t.SimpleExpr_2)) ()))) : t.FuncAsSimpleExpr =
+        <AddRestriction t.FuncAsSimpleExpr>
+        <FractionCancellation_NonMonomialFraction
+            (
+                (e.A e.B)
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A (Invol t.SimpleExpr_1 t.ConstPower_1) e.B)
+    (e.C t.SimpleExpr_2 e.D)),
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <FractionCancellation_NonMonomialFraction
+            (
+                (
+                    e.A
+                    (Invol
+                        t.SimpleExpr_1
+                        <SubConstNumber (t.ConstPower_1) 1>
+                    )
+                    e.B
+                )
+
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A t.SimpleExpr_1 e.B)
+    (e.C (Invol t.SimpleExpr_2 t.ConstPower_2) e.D)),
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <FractionCancellation_NonMonomialFraction
+            (
+                (
+                    e.A
+                    (Invol
+                        t.SimpleExpr_1
+                        <SubConstNumber (1) t.ConstPower_2>
+                    )
+                    e.B
+                )
+
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A t.SimpleExpr_1 e.B)
+    (e.C t.SimpleExpr_2 e.D)),
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <AddRestriction t.SimpleExpr_2>
+        <FractionCancellation_NonMonomialFraction
+            (
+                (e.A e.B)
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A (Invol t.SimpleExpr_1 t.ConstPower_1) e.B)
+    (e.C (s.FuncName t.FuncExpr) e.D)),
+    <IsFunctionName s.FuncName> : True,
+    (((1 1) () (((s.FuncName t.FuncExpr)) ()))) : t.SimpleExpr_2,
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <FractionCancellation_NonMonomialFraction
+            (
+                (
+                    e.A
+                    (Invol
+                        t.SimpleExpr_1
+                        <SubConstNumber (t.ConstPower_1) 1>
+                    )
+                    e.B
+                )
+
+                (e.C e.D)
+            )
+        >;
+
+    ((e.A (s.FuncName t.FuncExpr) e.B)
+    (e.C (Invol t.SimpleExpr_2 t.ConstPower_2) e.D)),
+    <IsFunctionName s.FuncName> : True,
+    (((1 1) () (((s.FuncName t.FuncExpr)) ()))) : t.SimpleExpr_1,
+    <IsSimpleExprEqual t.SimpleExpr_1 t.SimpleExpr_2> : True =
+        <FractionCancellation_NonMonomialFraction
+            (
+                (
+                    e.A
+                    (Invol
+                        t.SimpleExpr_1
+                        <SubConstNumber (1) t.ConstPower_2>
+                    )
+                    e.B
+                )
+
+                (e.C e.D)
+            )
         >;
 
     t.NonMonomialFrac = t.NonMonomialFrac;

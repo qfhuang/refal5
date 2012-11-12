@@ -2,8 +2,9 @@ $EXTERNAL IsFunctionName;
 
 $EXTERNAL RemoveZeroPower_Monomial;
 $EXTERNAL RemoveZeroPower_NonMonomialFraction;
-$EXTERNAL SearchZeroMult_SimpleSummand;
+$EXTERNAL SearchZeroMult_SimpleExpression;
 $EXTERNAL RemoveOnenessPower_NonMonomialFraction;
+$EXTERNAL FractionCancellation_NonMonomialFraction;
 
 * ---- Simplification for simple presentation ----
 
@@ -16,39 +17,25 @@ $ENTRY NoS12n
 
 $ENTRY S12n_SimpleExpression
 {
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (e.Processed) (t.SimpleSummand e.X) =
+    t.S12n_Functions (e.Processed) (t.SimpleSummand e.X) =
         <S12n_SimpleExpression
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
+            t.S12n_Functions
 
-            (e.Processed <Mu s.S12n_SimpleSummand <S12n_SimpleSummand
-                (
-                    s.S12n_SimpleSummand
-                    s.S12n_Monomial
-                    s.S12n_NonMonomialFraction
-                )
-
+            (e.Processed <S12n_SimpleSummand
+                t.S12n_Functions
                 t.SimpleSummand
-            >>) (e.X)
+            >)
+
+            (e.X)
         >;
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
+    (s.S12n_SimpleExpression s.S12n_Monomial s.S12n_NonMonomialFraction)
     (e.Processed) () =
-        (e.Processed);
+        <Mu s.S12n_SimpleExpression (e.Processed)>;
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    t.SimpleExpr =
+    t.S12n_Functions t.SimpleExpr =
         <S12n_SimpleExpression
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
-
+            t.S12n_Functions
             ()
             t.SimpleExpr
         >;
@@ -56,67 +43,63 @@ $ENTRY S12n_SimpleExpression
 
 S12n_SimpleSummand
 {
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (t.ConstMult t.Monomial t.NonMonomialFrac) =
+    t.S12n_Functions (t.ConstMult t.Monomial t.NonMonomialFrac),
+    t.S12n_Functions :
+        (
+            s.S12n_SimpleExpression
+            s.S12n_Monomial
+            s.S12n_NonMonomialFraction
+        )
+    =
         (
             t.ConstMult
             <Mu s.S12n_Monomial t.Monomial>
-            <Mu s.S12n_NonMonomialFraction <S12n_NonMonomialFraction
-                (
-                    s.S12n_SimpleSummand
-                    s.S12n_Monomial
-                    s.S12n_NonMonomialFraction
-                )
-
+            <S12n_NonMonomialFraction
+                t.S12n_Functions
                 t.NonMonomialFrac
-            >>
+            >
         );
 }
 
 S12n_NonMonomialFraction
 {
-    t.Functions (t.N t.D) =
+    t.S12n_Functions
+    (t.N t.D),
+    t.S12n_Functions :
         (
-            <S12n_NonMonomial t.Functions t.N>
-            <S12n_NonMonomial t.Functions t.D>
-        );
+            s.S12n_SimpleExpression
+            s.S12n_Monomial
+            s.S12n_NonMonomialFraction
+        )
+    =
+        <Mu s.S12n_NonMonomialFraction
+            (
+                <S12n_NonMonomial t.S12n_Functions t.N>
+                <S12n_NonMonomial t.S12n_Functions t.D>
+            )
+        >;
 }
 
 S12n_NonMonomial
 {
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (e.Processed) (t.NonMonomialEntry e.X) =
+    t.S12n_Functions (e.Processed) (t.NonMonomialEntry e.X) =
         <S12n_NonMonomial
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
+            t.S12n_Functions
 
             (e.Processed <S12n_NonMonomialEntry
-                (
-                    s.S12n_SimpleSummand
-                    s.S12n_Monomial
-                    s.S12n_NonMonomialFraction
-                )
-
+                t.S12n_Functions
                 t.NonMonomialEntry
-            >) (e.X)
+            >)
+
+            (e.X)
         >;
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (e.Processed) () =
+    t.S12n_Functions (e.Processed) () =
         (e.Processed);
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    t.NonMonomial =
+    t.S12n_Functions t.NonMonomial =
         <S12n_NonMonomial
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
-
+            t.S12n_Functions
             ()
             t.NonMonomial
         >;
@@ -124,40 +107,22 @@ S12n_NonMonomial
 
 S12n_NonMonomialEntry
 {
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (Invol t.SimpleExpr t.ConstPower) =
+    t.S12n_Functions (Invol t.SimpleExpr t.ConstPower) =
         (Invol <S12n_SimpleExpression
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
-
+            t.S12n_Functions
             t.SimpleExpr
         > t.ConstPower);
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    (s.FuncName t.SimpleExpr),
+    t.S12n_Functions (s.FuncName t.SimpleExpr),
     <IsFunctionName s.FuncName> : True =
         (s.FuncName <S12n_SimpleExpression
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
-
+            t.S12n_Functions
             t.SimpleExpr
         >);
 
-    (s.S12n_SimpleSummand s.S12n_Monomial s.S12n_NonMonomialFraction)
-    t.SimpleExpr = 
+    t.S12n_Functions t.SimpleExpr =
         <S12n_SimpleExpression
-            (
-                s.S12n_SimpleSummand
-                s.S12n_Monomial
-                s.S12n_NonMonomialFraction
-            )
-
+            t.S12n_Functions
             t.SimpleExpr
         >;
 }
