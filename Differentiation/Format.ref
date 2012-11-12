@@ -24,25 +24,16 @@ FormatSimpleExpression
 
 IsInternalForPairedBraces
 {
-    e.X ')' e.Y,
-    <Contain ('(') e.X> : False = False;
-
-    e.X '(' e.Y,
-    <Contain ('()') e.Y> : False = False;
-
-    e.X = True;
-
-/*
     e.X '(' e.Y ')' e.Z,
-    <Contain ('()') e.Y> : False =
-        <ContainCorrectBraces e.X e.Z>;
+    <Contain ('()') e.X> : False,
+    <Contain ('()') e.Z> : False =
+        <IsInternalForPairedBraces e.Y>;
 
     e.X '(' e.Y = False;
 
     e.X ')' e.Y = False;
 
     e.X = True;
-*/
 }
 
 RemoveFirstLastBrackets
