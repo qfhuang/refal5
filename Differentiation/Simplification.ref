@@ -57,6 +57,12 @@ S12n_Set
                 NoS12n
                 NoS12n
             )
+
+            (
+                NoS12n
+                NoS12n
+                ConstPowerCalc_NonMonomialFraction
+            )
         );
 }
 
@@ -87,14 +93,32 @@ FormatSomething
         e.Formatted;
 }
 
+SimpleExprToConstMult
+{
+    ((t.ConstMult () (() ()))) = t.ConstMult;
+
+    t.SimpleExpr =;
+}
+
 /* TODO: move Prout to Main.ref */
 /* TODO: maybe interactive ask user, use restriction or not? */
 AddRestriction
 {
-    t.Something =
+    s.Variable =
         <Prout
-            'Restriction: '
-            <FormatSomething t.Something>
+            'Restriction: ' <FormatSomething s.Variable>
+            ' != ' '0'
+        >;
+
+    /* Silent */
+    t.SimpleExpr,
+    <SimpleExprToConstMult t.SimpleExpr> : t.ConstMult,
+    t.ConstMult : (s.N s.D),
+    <Contain (0) s.N> : False =;
+
+    t.SimpleExpr =
+        <Prout
+            'Restriction: ' <FormatSomething t.SimpleExpr>
             ' != ' '0'
         >;
 }
@@ -366,4 +390,89 @@ $ENTRY ReduceSummandCount_SimpleExpression
         >;
 
     t.SimpleExpr = t.SimpleExpr;
+}
+
+ConstMultToSimpleExpr
+{
+    t.ConstMult = ((t.ConstMult () (() ())));
+}
+
+InvolRefalNumber
+{
+    t.N1 0 = 1;
+
+    t.N1 1 = t.N1;
+
+    (s.N1) s.N2 =
+        <Mul <InvolRefalNumber (s.N1) <- (s.N2) 1>> s.N1>;
+
+    ('-' s.N1) s.N2 =
+        <Mul <InvolRefalNumber ('-' s.N1) <- (s.N2) 1>> '-' s.N1>;
+}
+
+InvolConstMult
+{
+    (MonadicMinus s.N s.D) s.ConstPower,
+    <InvolRefalNumber ('-' s.N) s.ConstPower>
+    <InvolRefalNumber (s.D) s.ConstPower> :
+        {
+            '-' s.N s.D = (MonadicMinus s.N s.D);
+            s.N s.D = (s.N s.D);
+        };
+
+    (s.N s.D) s.ConstPower =
+        (
+            <InvolRefalNumber (s.N) s.ConstPower>
+            <InvolRefalNumber (s.D) s.ConstPower>
+        );
+}
+
+IsZeroPowerZero
+{
+    (0 t.D) 0 = True;
+    (MonadicMinus s.N s.D) s.ConstPower = False;
+    (s.N s.D) s.ConstPower = False;
+}
+
+$ENTRY ConstPowerCalc_NonMonomialFraction
+{
+    ((e.X (Invol t.SimpleExpr s.ConstPower) e.Y) t.D),
+        <SimpleExprToConstMult t.SimpleExpr> : t.ConstMult,
+        <IsZeroPowerZero t.ConstMult s.ConstPower> : False =
+        <ConstPowerCalc_NonMonomialFraction
+            (
+                (
+                    e.X
+
+                    <ConstMultToSimpleExpr <InvolConstMult
+                        t.ConstMult s.ConstPower
+                    >>
+
+                    e.Y
+                )
+
+                t.D
+            )
+        >;
+
+    (t.N (e.X (Invol t.SimpleExpr s.ConstPower) e.Y)),
+        <SimpleExprToConstMult t.SimpleExpr> : t.ConstMult,
+        <IsZeroPowerZero t.ConstMult s.ConstPower> : False =
+        <ConstPowerCalc_NonMonomialFraction
+            (
+                t.N
+
+                (
+                    e.X
+
+                    <ConstMultToSimpleExpr <InvolConstMult
+                        t.ConstMult s.ConstPower
+                    >>
+
+                    e.Y
+                )
+            )
+        >;
+
+    t.NonMonomialFrac = t.NonMonomialFrac;
 }

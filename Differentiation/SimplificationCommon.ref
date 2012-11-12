@@ -6,6 +6,7 @@ $EXTERNAL SearchZeroMult_SimpleExpression;
 $EXTERNAL RemoveOnenessPower_NonMonomialFraction;
 $EXTERNAL FractionCancellation_NonMonomialFraction;
 $EXTERNAL ReduceSummandCount_SimpleExpression;
+$EXTERNAL ConstPowerCalc_NonMonomialFraction;
 
 * ---- Simplification for simple presentation ----
 

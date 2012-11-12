@@ -7,6 +7,9 @@ $EXTERNAL SubConstNumber;
 $EXTERNAL AddConstNumber;
 $EXTERNAL Contain;
 
+/* TODO: move or add some transformation to Simplification.ref.
+ * For example currently: 2*x*6^2 -> 2*x*36. */
+
 $ENTRY SimplePresentation
 {
     t.Expr = <SimpleExpression t.Expr>;
