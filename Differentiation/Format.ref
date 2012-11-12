@@ -12,6 +12,8 @@ $ENTRY FormatTopLevelSimpleExpression
         >;
 }
 
+/* TODO: format x*sin(x)^-4 as x/sin(x)^4. */
+
 FormatSimpleExpression
 {
     () = '0';

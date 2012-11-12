@@ -63,6 +63,12 @@ S12n_Set
                 NoS12n
                 ConstPowerCalc_NonMonomialFraction
             )
+
+            (
+                ConstFractionCancellation_SimpleExpression
+                NoS12n
+                NoS12n
+            )
         );
 }
 
@@ -475,4 +481,58 @@ $ENTRY ConstPowerCalc_NonMonomialFraction
         >;
 
     t.NonMonomialFrac = t.NonMonomialFrac;
+}
+
+Gcd
+{
+    0 s.D = 1;
+    s.N 0 = 1;
+
+    s.N s.D,
+    <- s.N s.D> :
+        {
+            0 = s.D;
+            s.R = <Gcd s.D s.R>;
+            '-' s.R = <Gcd s.N s.R>;
+        };
+}
+
+ConstFractionCancellation
+{
+    (MonadicMinus s.N s.D) =
+        (
+            MonadicMinus
+            <Div s.N <Gcd s.N s.D>>
+            <Div s.D <Gcd s.N s.D>>
+        );
+
+    (s.N s.D) =
+        (
+            <Div s.N <Gcd s.N s.D>>
+            <Div s.D <Gcd s.N s.D>>
+        );
+}
+
+$ENTRY ConstFractionCancellation_SimpleExpression
+{
+    (e.Processed) (t.SimpleSummand e.X),
+    t.SimpleSummand : (t.ConstMult t.Monomial t.NonMonomial) =
+        <ConstFractionCancellation_SimpleExpression
+            (
+                e.Processed
+
+                (
+                    <ConstFractionCancellation t.ConstMult>
+                    t.Monomial
+                    t.NonMonomial
+                )
+            )
+
+            (e.X)
+        >;
+
+    (e.Processed) () = (e.Processed);
+
+    t.SimpleExpr =
+        <ConstFractionCancellation_SimpleExpression () t.SimpleExpr>;
 }
