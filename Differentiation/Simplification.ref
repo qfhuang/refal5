@@ -51,6 +51,12 @@ S12n_Set
                 NoS12n
                 FractionCancellation_NonMonomialFraction
             )
+
+            (
+                ReduceSummandCount_SimpleExpression
+                NoS12n
+                NoS12n
+            )
         );
 }
 
@@ -314,4 +320,50 @@ $ENTRY FractionCancellation_NonMonomialFraction
         >;
 
     t.NonMonomialFrac = t.NonMonomialFrac;
+}
+
+SubConstMult
+{
+    (MonadicMinus s.N1 s.D1) (MonadicMinus s.N2 s.D2) =
+        <SubConstMult (s.N1 s.D1) (s.N2 s.D2)>;
+
+    (MonadicMinus s.N1 s.D1) (s.N2 s.D2) =
+        (
+            <+ (<Mul ('-' s.N1) s.D2>) <Mul (s.N2) s.D1>>
+            <Mul (s.D1) s.D2>
+        );
+
+    (s.N1 s.D1) (MonadicMinus s.N2 s.D2) =
+        (
+            <+ (<Mul (s.N1) s.D2>) <Mul ('-' s.N2) s.D1>>
+            <Mul (s.D1) s.D2>
+        );
+
+    (s.N1 s.D1) (s.N2 s.D2) =
+        (
+            <+ (<Mul (s.N1) s.D2>) <Mul (s.N2) s.D1>>
+            <Mul (s.D1) s.D2>
+        );
+}
+
+$ENTRY ReduceSummandCount_SimpleExpression
+{
+    (e.X t.SimpleSummand_1 t.SimpleSummand_2 e.Y),
+    t.SimpleSummand_1 : (t.ConstMult_1 t.Monomial t.NonMonomial),
+    t.SimpleSummand_2 : (t.ConstMult_2 t.Monomial t.NonMonomial) =
+        <ReduceSummandCount_SimpleExpression
+            (
+                e.X
+
+                (
+                    <SubConstMult t.ConstMult_1 t.ConstMult_2>
+                    t.Monomial
+                    t.NonMonomial
+                )
+
+                e.Y
+            )
+        >;
+
+    t.SimpleExpr = t.SimpleExpr;
 }
