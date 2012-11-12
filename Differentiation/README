@@ -54,14 +54,4 @@ SimpleSummand -> (ConstMult Monomial NonMonomialFraction)
 // Summa of SimpleSummand.
 SimpleExpression -> ({SimpleSummand})
 
----- TODO (maybe) ----
-
-{Something} is iteration of something (several something presence).
-
-Fraction -> Summa Summa // numerator and denominator
-Summa -> ({Summand})
-Summand -> (ConstMult Monomial NonMonomial)
-FunctionMult -> (Plus {Function}) | (Minus {Function}) // product of Function
-Function -> (FuncName Fraction)
-
 // vim: set ft=asciidoc:
