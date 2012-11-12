@@ -18,6 +18,11 @@ $ENTRY S12n_SimplePresentation
     e.X =;
 }
 
+/* TODO:
+ * Monomial: sort.
+ * NonMonomialFraction: sort.
+ * SimpleExpression: sort. */
+
 S12n_Set
 {
     =
