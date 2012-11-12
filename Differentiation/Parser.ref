@@ -4,6 +4,8 @@ $EXTERNAL IsVariable;
 $EXTERNAL IsMacrodigit;
 $EXTERNAL IsFunctionName;
 
+/* TODO: error messages. */
+
 $ENTRY Parse
 {
     s.D1 e.InExpr '/' s.D2 e.InVar,
