@@ -1,0 +1,180 @@
+$EXTERNAL Lex;
+$EXTERNAL Contain;
+$EXTERNAL IsVariable;
+$EXTERNAL IsMacrodigit;
+$EXTERNAL IsFunctionName;
+
+/* TODO: error messages. */
+
+$ENTRY Parse
+{
+    s.D1 e.InExpr '/' s.D2 e.InVar,
+    <Contain ('Dd') s.D1> : True,
+    <Contain ('Dd') s.D2> : True,
+    <Expression <PrepareParse <Lex e.InExpr>>> : t.OutExpr,
+    <Variable   <Lex e.InVar>>  : t.OutVar =
+        (t.OutVar) t.OutExpr;
+
+    e.InExpr,
+    <Expression <PrepareParse <Lex e.InExpr>>> : t.OutExpr =
+        t.OutExpr;
+ 
+    e.X = <ParserDebug ('Parse') e.X>;
+}
+
+ParserDebug
+{
+/*
+    (e.FunctionName) e.X =
+        <Prout 'DEBUG: ' e.FunctionName ': ' e.X>;
+*/
+
+    (e.FunctionName) e.X =;
+}
+
+PrepareParse
+{
+    e.X t.FuncName '(' e.InExpr ')' e.Y,
+    <IsFunctionName t.FuncName> : True,
+    <Contain ('(' ')') e.InExpr> : False =
+        <PrepareParse e.X (t.FuncName e.InExpr) e.Y>;
+
+    e.X '(' e.InExpr ')' e.Y,
+    <Contain ('(' ')') e.InExpr> : False =
+        <PrepareParse e.X (e.InExpr) e.Y>;
+
+    e.X = e.X;
+}
+
+ConstPower
+{
+    s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        s.Macrodigit;
+
+    Plus e.InConstPower,
+    <ConstPower e.InConstPower> : t.OutConstPower =
+        t.OutConstPower;
+
+    Minus e.InConstPower,
+    <ConstPower e.InConstPower> : (MonadicMinus s.Macrodigit) =
+        s.Macrodigit;
+
+    Minus e.InConstPower,
+    <ConstPower e.InConstPower> : s.Macrodigit =
+        (MonadicMinus s.Macrodigit);
+
+    e.X = <ParserDebug ('ConstPower') e.X>;
+}
+
+Number
+{
+    s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        s.Macrodigit;
+
+    e.X = <ParserDebug ('Number') e.X>;
+}
+
+Variable
+{
+    s.Variable,
+    <IsVariable s.Variable> : True =
+        s.Variable;
+
+    e.X = <Prout 'DEBUG: Variable' e.X>;
+}
+
+Invol
+{
+    e.InExpr Invol e.InConstPower,
+    <Expression e.InExpr> : t.OutExpr,
+    <ConstPower e.InConstPower> : t.OutConstPower =
+        (Invol t.OutExpr t.OutConstPower);
+
+    e.X = <ParserDebug ('Invol') e.X>;
+}
+
+Function
+{
+    (t.FuncName e.InExpr),
+    <IsFunctionName t.FuncName> : True,
+    <Expression e.InExpr> : t.OutExpr =
+        (t.FuncName t.OutExpr);
+
+    e.X = <ParserDebug ('Function') e.X>;
+}
+
+Expr_0
+{
+    t.Macrodigit,
+    <Number t.Macrodigit> : t.OutNumber =
+        t.OutNumber;
+
+    t.Variable,
+    <IsVariable t.Variable> : True =
+        t.Variable;
+
+    e.InInvol,
+    <Invol e.InInvol> : t.OutInvol =
+        t.OutInvol;
+
+    e.InFunction,
+    <Function e.InFunction> : t.OutFunction =
+        t.OutFunction;
+
+    (e.Expr),
+    <Expression e.Expr> : t.OutExpr =
+        t.OutExpr;
+
+    e.X = <ParserDebug ('Expr_0') e.X>;
+}
+
+Expr_1
+{ 
+    Plus e.InExpr_1,
+    <Expr_1 e.InExpr_1> : t.OutExpr_1 =
+        t.OutExpr_1;
+
+    Minus e.InExpr_1,
+    <Expr_1 e.InExpr_1> : t.OutExpr_1 =
+        (MonadicMinus t.OutExpr_1);
+
+    e.InExpr_0,
+    <Expr_0 e.InExpr_0> : t.OutExpr_0 =
+        t.OutExpr_0;
+
+    e.X = <ParserDebug ('Expr_1') e.X>;
+}
+
+Expr_2
+{
+    e.InExpr_2 s.Op e.InExpr_1,
+    <Contain (Mul Div) s.Op> : True,
+    <Contain (Mul Div) e.InExpr_1> : False,
+    <Expr_2 e.InExpr_2> : t.OutExpr_2,
+    <Expr_1 e.InExpr_1> : t.OutExpr_1 =
+        (s.Op t.OutExpr_2 t.OutExpr_1);
+
+    e.InExpr_1,
+    <Expr_1 e.InExpr_1> : t.OutExpr_1 =
+        t.OutExpr_1;
+
+    e.X = <ParserDebug ('Expr_2') e.X>;
+}
+
+Expression
+{
+    e.InExpr s.Op e.InExpr_2,
+    <Contain (Plus Minus) s.Op> : True,
+    <Contain (Plus Minus) e.InExpr_2> : False,
+    <Expression e.InExpr>   : t.OutExpr,
+    <Expr_2     e.InExpr_2> : t.OutExpr_2 =
+        (s.Op t.OutExpr t.OutExpr_2);
+
+    e.InExpr_2,
+    <Expr_2 e.InExpr_2> : t.OutExpr_2 =
+        t.OutExpr_2;
+
+    e.X = <ParserDebug ('Expression') e.X>;
+}

@@ -1,0 +1,132 @@
+$EXTERNAL IsFunctionName;
+
+$EXTERNAL RemoveZeroPower_Monomial;
+$EXTERNAL RemoveZeroPower_NonMonomialFraction;
+$EXTERNAL SearchZeroMult_SimpleExpression;
+$EXTERNAL RemoveOnenessPower_NonMonomialFraction;
+$EXTERNAL FractionCancellation_NonMonomialFraction;
+$EXTERNAL ReduceSummandCount_SimpleExpression;
+$EXTERNAL ConstPowerCalc_NonMonomialFraction;
+$EXTERNAL ConstFractionCancellation_SimpleExpression;
+$EXTERNAL RereadViaParser_SimpleExpression;
+
+* ---- Simplification for simple presentation ----
+
+$ENTRY NoS12n
+{
+    t.X = t.X;
+}
+
+* S12n is abbreviation for "Simplification".
+
+$ENTRY S12n_SimpleExpression
+{
+    t.S12n_Functions (e.Processed) (t.SimpleSummand e.X) =
+        <S12n_SimpleExpression
+            t.S12n_Functions
+
+            (e.Processed <S12n_SimpleSummand
+                t.S12n_Functions
+                t.SimpleSummand
+            >)
+
+            (e.X)
+        >;
+
+    (s.S12n_SimpleExpression s.S12n_Monomial s.S12n_NonMonomialFraction)
+    (e.Processed) () =
+        <Mu s.S12n_SimpleExpression (e.Processed)>;
+
+    t.S12n_Functions t.SimpleExpr =
+        <S12n_SimpleExpression
+            t.S12n_Functions
+            ()
+            t.SimpleExpr
+        >;
+}
+
+S12n_SimpleSummand
+{
+    t.S12n_Functions (t.ConstMult t.Monomial t.NonMonomialFrac),
+    t.S12n_Functions :
+        (
+            s.S12n_SimpleExpression
+            s.S12n_Monomial
+            s.S12n_NonMonomialFraction
+        )
+    =
+        (
+            t.ConstMult
+            <Mu s.S12n_Monomial t.Monomial>
+            <S12n_NonMonomialFraction
+                t.S12n_Functions
+                t.NonMonomialFrac
+            >
+        );
+}
+
+S12n_NonMonomialFraction
+{
+    t.S12n_Functions
+    (t.N t.D),
+    t.S12n_Functions :
+        (
+            s.S12n_SimpleExpression
+            s.S12n_Monomial
+            s.S12n_NonMonomialFraction
+        )
+    =
+        <Mu s.S12n_NonMonomialFraction
+            (
+                <S12n_NonMonomial t.S12n_Functions t.N>
+                <S12n_NonMonomial t.S12n_Functions t.D>
+            )
+        >;
+}
+
+S12n_NonMonomial
+{
+    t.S12n_Functions (e.Processed) (t.NonMonomialEntry e.X) =
+        <S12n_NonMonomial
+            t.S12n_Functions
+
+            (e.Processed <S12n_NonMonomialEntry
+                t.S12n_Functions
+                t.NonMonomialEntry
+            >)
+
+            (e.X)
+        >;
+
+    t.S12n_Functions (e.Processed) () =
+        (e.Processed);
+
+    t.S12n_Functions t.NonMonomial =
+        <S12n_NonMonomial
+            t.S12n_Functions
+            ()
+            t.NonMonomial
+        >;
+}
+
+S12n_NonMonomialEntry
+{
+    t.S12n_Functions (Invol t.SimpleExpr t.ConstPower) =
+        (Invol <S12n_SimpleExpression
+            t.S12n_Functions
+            t.SimpleExpr
+        > t.ConstPower);
+
+    t.S12n_Functions (s.FuncName t.SimpleExpr),
+    <IsFunctionName s.FuncName> : True =
+        (s.FuncName <S12n_SimpleExpression
+            t.S12n_Functions
+            t.SimpleExpr
+        >);
+
+    t.S12n_Functions t.SimpleExpr =
+        <S12n_SimpleExpression
+            t.S12n_Functions
+            t.SimpleExpr
+        >;
+}

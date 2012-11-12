@@ -1,0 +1,136 @@
+$EXTERNAL Contain;
+$EXTERNAL IsVariable;
+$EXTERNAL IsMacrodigit;
+$EXTERNAL IsFunctionName;
+$EXTERNAL SubConstNumber;
+
+$ENTRY Differentiation
+{
+    (t.Var) t.Expr =
+        <DExpression (t.Var) t.Expr>;
+
+    e.X =;
+}
+
+DVar
+{
+    (t.Var) t.Var = 1;
+    (t.Var) t.Variable = 0;
+}
+
+DInvol
+{
+    (t.Var) (Invol t.Expr t.ConstPower) =
+        (Mul
+            (Mul
+                t.ConstPower
+                (Invol t.Expr <SubConstNumber (t.ConstPower) 1>)
+            )
+            <DExpression (t.Var) t.Expr>
+        );
+}
+
+FuncPair
+{
+    (sin t.Expr) = (cos t.Expr);
+    (cos t.Expr) = (MonadicMinus (sin t.Expr));
+    (ln t.Expr) = (Div 1 t.Expr);
+    (exp t.Expr) = (exp t.Expr);
+    (sqrt t.Expr) = (Div 1 (Mul 2 (sqrt t.Expr)));
+
+    (arcsin t.Expr) =
+        (Div
+            1
+            (sqrt
+                (Sub
+                    1
+                    (MonadicMinus
+                        (Invol t.Expr 2)
+                    )
+                )
+            )
+        );
+
+    (arccos t.Expr) =
+        (Div
+            (MonadicMinus 1)
+            (sqrt
+                (Sub
+                    1
+                    (MonadicMinus
+                        (Invol t.Expr 2)
+                    )
+                )
+            )
+        );
+}
+
+DFunc
+{
+    (t.Var) (t.FuncName t.Expr) =
+        (Mul <FuncPair (t.FuncName t.Expr)> <DExpression (t.Var) t.Expr>);
+}
+
+DExpr_0
+{
+    (t.Var) s.Macrodigit,
+    <IsMacrodigit s.Macrodigit> : True =
+        0;
+
+    (t.Var) t.Variable,
+    <IsVariable t.Variable> : True =
+        <DVar (t.Var) t.Variable>;
+
+    (t.Var) (Invol t.Expr t.ConstPower) =
+        <DInvol (t.Var) (Invol t.Expr t.ConstPower)>;
+
+    (t.Var) (t.FuncName t.Expr),
+    <IsFunctionName t.FuncName> : True =
+        <DFunc (t.Var) (t.FuncName t.Expr)>;
+
+    (t.Var) t.Expr =
+        <DExpression (t.Var) t.Expr>;
+}
+
+DExpr_1
+{
+    (t.Var) (MonadicMinus t.Expr_1) =
+        (MonadicMinus <DExpr_1 (t.Var) t.Expr_1>);
+
+    (t.Var) t.Expr_0 =
+        <DExpr_0 (t.Var) t.Expr_0>;
+}
+
+DExpr_2
+{
+    (t.Var) (Mul t.Expr_2 t.Expr_1) =
+        (Plus
+            (Mul <DExpr_2 (t.Var) t.Expr_2> t.Expr_1)
+            (Mul t.Expr_2 <DExpr_2 (t.Var) t.Expr_1>)
+        );
+
+    (t.Var) (Div t.Expr_2 t.Expr_1) =
+        (Div
+            (Minus
+                (Mul <DExpr_2 (t.Var) t.Expr_2> t.Expr_1)
+                (Mul t.Expr_2 <DExpr_1 (t.Var) t.Expr_1>)
+            )
+            (Invol t.Expr_1 2)
+        );
+
+    (t.Var) t.Expr_1 =
+        <DExpr_1 (t.Var) t.Expr_1>;
+}
+
+DExpression
+{
+    (t.Var) (s.Op t.Expr t.Expr_2),
+    <Contain (Plus Minus) s.Op> : True =
+        (s.Op
+            <DExpression (t.Var) t.Expr>
+            <DExpr_2 (t.Var) t.Expr_2>
+        );
+
+    (t.Var) t.Expr_2 =
+        <DExpr_2 (t.Var) t.Expr_2>;
+}

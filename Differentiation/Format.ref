@@ -1,0 +1,250 @@
+$EXTERNAL Symb;
+$EXTERNAL Explode;
+$EXTERNAL Contain;
+$EXTERNAL IsFunctionName;
+$EXTERNAL NegSimpleSummand;
+
+$ENTRY FormatTopLevelSimpleExpression
+{
+    t.SimpleExpr =
+        <RemoveFirstLastBrackets
+            <FormatSimpleExpression t.SimpleExpr>
+        >;
+}
+
+/* TODO: format x*sin(x)^-4 as x/sin(x)^4. */
+
+FormatSimpleExpression
+{
+    () = '0';
+
+    t.SimpleExpr =
+        <FormatSimpleExpression_Internal t.SimpleExpr>
+}
+
+IsInternalForPairedBraces
+{
+    e.X '(' e.Y ')' e.Z,
+    <Contain ('()') e.X> : False,
+    <Contain ('()') e.Z> : False =
+        <IsInternalForPairedBraces e.Y>;
+
+    e.X '(' e.Y = False;
+
+    e.X ')' e.Y = False;
+
+    e.X = True;
+}
+
+RemoveFirstLastBrackets
+{
+    '(' e.X ')',
+    <IsInternalForPairedBraces e.X> : True =
+        <RemoveFirstLastBrackets e.X>;
+
+    e.X = e.X;
+}
+
+FormatSimpleExpression_Internal
+{
+    (t.SimpleSummand) =
+        <FormatSimpleSummand t.SimpleSummand>;
+
+    () =;
+
+    t.SimpleExpr =
+        '(' <FormatSimpleExpression_Internal2 t.SimpleExpr> ')';
+
+    e.X =;
+}
+
+IsPositiveSummand
+{
+    ((MonadicMinus s.N s.D) t.Monomial t.NonMonomialFrac) =
+        False;
+
+    ((s.N s.D) t.Monomial t.NonMonomialFrac) =
+        True;
+}
+
+FormatSimpleExpression_Internal2
+{
+    (t.SimpleSummand_1 t.SimpleSummand_2 e.X),
+    <IsPositiveSummand t.SimpleSummand_2> : True =
+        <FormatSimpleSummand t.SimpleSummand_1> '+'
+        <FormatSimpleExpression_Internal2
+            (t.SimpleSummand_2 e.X)
+        >;
+
+    (t.SimpleSummand_1 t.SimpleSummand_2 e.X),
+    <IsPositiveSummand t.SimpleSummand_2> : False =
+        <FormatSimpleSummand t.SimpleSummand_1> '-'
+        <FormatSimpleExpression_Internal2
+            (<NegSimpleSummand t.SimpleSummand_2> e.X)
+        >;
+
+    (t.SimpleSummand) =
+        <FormatSimpleSummand t.SimpleSummand>;
+
+    () =;
+
+    e.X =;
+}
+
+FormatConstPower
+{
+    (MonadicMinus s.Macrodigit) = '-' <Symb s.Macrodigit>;
+    s.Macrodigit = <Symb s.Macrodigit>;
+}
+
+FormatConstMult
+{
+    (MonadicMinus s.Macrodigit) = '-' <Symb s.Macrodigit>;
+    s.Macrodigit = <Symb s.Macrodigit>;
+}
+
+FormatVarPower
+{
+    (s.Variable s.ConstPower),
+        s.ConstPower : 1 =
+        <Explode s.Variable>;
+
+    (s.Variable t.ConstPower) =
+        <Explode s.Variable> '^' <FormatConstPower t.ConstPower>;
+}
+
+SplitMonomial
+{
+    (e.N) (e.D) ((s.Variable s.ConstPower) e.X) =
+        <SplitMonomial
+            (e.N (s.Variable s.ConstPower))
+            (e.D)
+            (e.X)
+        >;
+
+    (e.N) (e.D) ((s.Variable (MonadicMinus s.ConstPowerAbs)) e.X) =
+        <SplitMonomial
+            (e.N)
+            (e.D (s.Variable s.ConstPowerAbs))
+            (e.X)
+        >;
+
+    (e.N) (e.D) () = (e.N) (e.D);
+
+    t.Monomial =
+        <SplitMonomial () () t.Monomial>;
+}
+
+FormatMonomial
+{
+    (t.VarPower_1 t.VarPower_2 e.X) =
+        <FormatVarPower t.VarPower_1> '*'
+        <FormatMonomial (t.VarPower_2 e.X)>;
+
+    (t.VarPower) =
+        <FormatVarPower t.VarPower>;
+
+    () = '1';
+}
+
+FormatNonMonomialEntry
+{
+    (Invol t.SimpleExpr t.ConstPower) =
+        <FormatSimpleExpression t.SimpleExpr> '^'
+        <FormatConstPower t.ConstPower>;
+
+    (s.FuncName t.SimpleExpr),
+    <IsFunctionName s.FuncName> : True =
+        <Explode s.FuncName> '('
+        <RemoveFirstLastBrackets
+            <FormatSimpleExpression t.SimpleExpr>
+        > ')';
+
+    t.SimpleExpr =
+        <FormatSimpleExpression t.SimpleExpr>;
+}
+
+FormatNonMonomial
+{
+    (t.NMEntry_1 t.NMEntry_2 e.X) =
+        <FormatNonMonomialEntry t.NMEntry_1> '*'
+        <FormatNonMonomial (t.NMEntry_2 e.X)>;
+
+    (t.NMEntry) =
+        <FormatNonMonomialEntry t.NMEntry>;
+
+    () = '1';
+}
+
+FormatSummandFractionEntry
+{
+    (t.ConstMult () ()) =
+        <FormatConstMult t.ConstMult>;
+
+    (1 t.Monomial ()) =
+        <FormatMonomial t.Monomial>;
+
+    (1 () t.NonMonomial) =
+        <FormatNonMonomial t.NonMonomial>;
+
+    (t.ConstMult t.Monomial ()) =
+        '(' <FormatConstMult t.ConstMult> '*'
+        <FormatMonomial t.Monomial> ')';
+
+    (t.ConstMult () t.NonMonomial) =
+        '(' <FormatConstMult t.ConstMult> '*'
+        <FormatNonMonomial t.NonMonomial> ')';
+
+    (1 t.Monomial t.NonMonomial) =
+        '(' <FormatMonomial t.Monomial> '*'
+        <FormatNonMonomial t.NonMonomial> ')';
+
+    (t.ConstMult t.Monomial t.NonMonomial) =
+        '(' <FormatConstMult t.ConstMult> '*'
+        <FormatMonomial t.Monomial> '*'
+        <FormatNonMonomial t.NonMonomial> ')';
+}
+
+FormatSimpleSummand
+{
+    ((MonadicMinus s.ConstN s.ConstD) t.Monomial t.NonMonomialFrac) =
+        <FormatSimpleSummand
+            (
+                ((MonadicMinus s.ConstN) s.ConstD)
+                t.Monomial
+                t.NonMonomialFrac
+            )
+        >;
+
+    (t.ConstPair t.Monomial t.NonMonomialFrac),
+    t.ConstPair : (t.ConstN 1),
+    <SplitMonomial t.Monomial> : t.MonomialN (),
+    t.NonMonomialFrac : (t.NonMonomialN ()) =
+        <FormatSummandFractionEntry
+            (
+                t.ConstN
+                t.MonomialN
+                t.NonMonomialN
+            )
+        >;
+
+    (t.ConstPair t.Monomial t.NonMonomialFrac),
+    t.ConstPair : (t.ConstN t.ConstD),
+    <SplitMonomial t.Monomial> : t.MonomialN t.MonomialD,
+    t.NonMonomialFrac : (t.NonMonomialN t.NonMonomialD) =
+        <FormatSummandFractionEntry
+            (
+                t.ConstN
+                t.MonomialN
+                t.NonMonomialN
+            )
+        >
+        '/'
+        <FormatSummandFractionEntry
+            (
+                t.ConstD
+                t.MonomialD
+                t.NonMonomialD
+            )
+        >;
+}

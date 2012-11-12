@@ -1,0 +1,77 @@
+$ENTRY Lex
+{
+    (e.1) '+'      e.2 = <Lex (e.1 Plus)   e.2>;
+    (e.1) '-'      e.2 = <Lex (e.1 Minus)  e.2>;
+    (e.1) '*'      e.2 = <Lex (e.1 Mul)    e.2>;
+    (e.1) '/'      e.2 = <Lex (e.1 Div)    e.2>;
+    (e.1) '^'      e.2 = <Lex (e.1 Invol)  e.2>;
+
+    (e.1) 'sin'    e.2 = <Lex (e.1 sin)    e.2>;
+    (e.1) 'cos'    e.2 = <Lex (e.1 cos)    e.2>;
+    (e.1) 'ln'     e.2 = <Lex (e.1 ln)     e.2>;
+    (e.1) 'exp'    e.2 = <Lex (e.1 exp)    e.2>;
+    (e.1) 'sqrt'   e.2 = <Lex (e.1 sqrt)   e.2>;
+    (e.1) 'arcsin' e.2 = <Lex (e.1 arcsin) e.2>;
+    (e.1) 'arccos' e.2 = <Lex (e.1 arccos) e.2>;
+
+    (e.1) s.2 e.3,
+    <IsDigit s.2> : True =
+        <Lex <GetNumber (e.1) (s.2) e.3>>;
+
+    (e.1) s.2 e.3,
+    <IsFirstIdentifierSymbol s.2> : True =
+        <Lex <GetIdentifier (e.1) (s.2) e.3>>;
+
+    (e.1) '(' e.2 = <Lex (e.1 '(') e.2>;
+    (e.1) ')' e.2 = <Lex (e.1 ')') e.2>;
+    (e.1) ' ' e.2 = <Lex (e.1) e.2>;
+
+    /* TODO: difference from empty input. */
+    /* Return empty string on error */
+    (e.1) s.2 e.3 =
+        <Prout 'Lex: cannot make recognition: (' e.1 ')' s.2 e.3>;
+
+    (e.1) = e.1;
+    e.1   = <Lex () e.1>;
+}
+
+* <GetNumber e.Checked (e.FirstSymbols) e.ToCheck>
+* Returns: (e.Checked Number) e.ToCheckNew.
+GetNumber
+{
+    (e.1) (e.2) s.3 e.4, <IsDigit s.3> : True =
+        <GetNumber (e.1) (e.2 s.3) e.4>;
+
+    (e.1) (e.2) e.3 =
+        (e.1 <Numb e.2>) e.3;
+}
+
+IsDigit
+{
+    s.1, <Type s.1> : 'D0' s.1 = True;
+    s.1                        = False;
+}
+
+* <GetIdentifier e.Checked (e.FirstSymbols) e.ToCheck>
+* Returns: (e.Checked Identifier) e.ToCheckNew.
+GetIdentifier
+{
+    (e.1) (e.2) s.3 e.4, <IsNextIdentifierSymbol s.3> : True =
+        <GetIdentifier (e.1) (e.2 s.3) e.4>;
+
+    (e.1) (e.2) e.3 =
+        (e.1 <Implode e.2>) e.3;
+}
+
+IsFirstIdentifierSymbol
+{
+    s.1, <Type s.1> : 'Ll' s.1 = True;
+    s.1                        = False;
+}
+
+IsNextIdentifierSymbol
+{
+    s.1, <Type s.1> : 'Ll' s.1 = True;
+    s.1, <Type s.1> : 'D0' s.1 = True;
+    s.1                        = False;
+}
