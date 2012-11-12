@@ -25,6 +25,12 @@ S12n_Set
             (
                 NoS12n
                 RemoveZeroPower_Monomial
+                NoS12n
+            )
+
+            (
+                NoS12n
+                NoS12n
                 RemoveZeroPower_NonMonomialFraction
             )
 
@@ -62,7 +68,7 @@ S12n_Set_MakeSequentially
     () t.SimpleExpr = t.SimpleExpr;
 }
 
-* For Variable or SimpleExpression.
+* Format Variable or SimpleExpression.
 FormatSomething
 {
     s.Variable,
