@@ -283,7 +283,7 @@ SimpleSummandMul
     (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_1,
     t.SimpleExpr_1 : (MonadicMinus t.SimpleExpr_0) =
         <SimpleSummandMul
-            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomialFrac)
+            (<NegConstMult t.ConstMult> t.Monomial t.NonMonomialFrac)
             t.SimpleExpr_0
         >;
 
@@ -309,7 +309,7 @@ SimpleSummandDiv
     (t.ConstMult t.Monomial t.NonMonomialFrac) t.SimpleExpr_1,
     t.SimpleExpr_1 : (MonadicMinus t.SimpleExpr_0) =
         <SimpleSummandDiv
-            (<NegConstNumber t.ConstMult> t.Monomial t.NonMonomialFrac)
+            (<NegConstMult t.ConstMult> t.Monomial t.NonMonomialFrac)
             t.SimpleExpr_0
         >;
 

@@ -8,37 +8,42 @@ $EXTERNAL S12n_SimpleExpression;
 $ENTRY S12n_SimplePresentation
 {
     t.SimpleExpr =
-        <S12n_SimplePresentation_Internal
-            (
-                (
-                    NoS12n
-                    RemoveZeroPower_Monomial
-                    RemoveZeroPower_NonMonomialFraction
-                )
-
-                (
-                    SearchZeroMult_SimpleSummand
-                    NoS12n
-                    NoS12n
-                )
-
-                (
-                    NoS12n
-                    NoS12n
-                    RemoveOnenessPower_NonMonomialFraction
-                )
-            )
-
+        <S12n_Set_MakeSequentially
+            <S12n_Set>
             t.SimpleExpr
         >;
 
     e.X =;
 }
 
-S12n_SimplePresentation_Internal
+S12n_Set
+{
+    =
+        (
+            (
+                NoS12n
+                RemoveZeroPower_Monomial
+                RemoveZeroPower_NonMonomialFraction
+            )
+
+            (
+                SearchZeroMult_SimpleSummand
+                NoS12n
+                NoS12n
+            )
+
+            (
+                NoS12n
+                NoS12n
+                RemoveOnenessPower_NonMonomialFraction
+            )
+        )
+}
+
+S12n_Set_MakeSequentially
 {
     (t.S12n_Functions e.X) t.SimpleExpr =
-        <S12n_SimplePresentation_Internal
+        <S12n_Set_MakeSequentially
             (e.X)
             <S12n_SimpleExpression
                 t.S12n_Functions

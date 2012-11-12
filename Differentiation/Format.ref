@@ -216,9 +216,11 @@ FormatSimpleSummand
 {
     ((MonadicMinus s.ConstN s.ConstD) t.Monomial t.NonMonomialFrac) =
         <FormatSimpleSummand
-            ((MonadicMinus s.ConstN) s.ConstD)
-            t.Monomial
-            t.NonMonomialFrac
+            (
+                ((MonadicMinus s.ConstN) s.ConstD)
+                t.Monomial
+                t.NonMonomialFrac
+            )
         >;
 
     (t.ConstPair t.Monomial t.NonMonomialFrac),
