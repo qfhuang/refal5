@@ -6,6 +6,8 @@ $EXTERNAL SubConstNumber;
 $EXTERNAL FormatTopLevelSimpleExpression;
 $EXTERNAL NoS12n;
 $EXTERNAL S12n_SimpleExpression;
+$EXTERNAL Parse;
+$EXTERNAL SimplePresentation;
 
 $ENTRY S12n_SimplePresentation
 {
@@ -71,6 +73,12 @@ S12n_Set
 
             (
                 ConstFractionCancellation_SimpleExpression
+                NoS12n
+                NoS12n
+            )
+
+            (
+                RereadViaParser_SimpleExpression
                 NoS12n
                 NoS12n
             )
@@ -530,4 +538,15 @@ $ENTRY ConstFractionCancellation_SimpleExpression
 
     t.SimpleExpr =
         <ConstFractionCancellation_SimpleExpression () t.SimpleExpr>;
+}
+
+/* Using simplification from SimplePresentation. */
+$ENTRY RereadViaParser_SimpleExpression
+{
+    t.SimpleExpr =
+        <SimplePresentation
+            <Parse
+                <FormatTopLevelSimpleExpression t.SimpleExpr>
+            >
+        >;
 }

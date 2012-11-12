@@ -8,6 +8,7 @@ $EXTERNAL FractionCancellation_NonMonomialFraction;
 $EXTERNAL ReduceSummandCount_SimpleExpression;
 $EXTERNAL ConstPowerCalc_NonMonomialFraction;
 $EXTERNAL ConstFractionCancellation_SimpleExpression;
+$EXTERNAL RereadViaParser_SimpleExpression;
 
 * ---- Simplification for simple presentation ----
 
