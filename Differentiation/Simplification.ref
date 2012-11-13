@@ -85,6 +85,21 @@ S12n_Set
         );
 }
 
+IsSimpleExprEqual
+{
+    t.SimpleExpr t.SimpleExpr = True;
+
+    () (((0 t.ConstD) () (() ()))),
+    <Contain (0) t.ConstD> : False =
+        True;
+
+    (((0 t.ConstD) () (() ()))) (),
+    <Contain (0) t.ConstD> : False =
+        True;
+
+    t.SimpleExpr_1 t.SimpleExpr_2 = False;
+}
+
 S12n_Set_Make
 {
     (t.S12n_Functions e.X) t.SimpleExprIn,
@@ -93,11 +108,13 @@ S12n_Set_Make
     t.SimpleExprIn t.SimpleExprOut :
     {
         /* If expr was not changed, try next function. */
-        t.SimpleExpr t.SimpleExpr =
-            <S12n_Set_Make (e.X) t.SimpleExpr>;
+        t.SimpleExprIn t.SimpleExprOut,
+        <IsSimpleExprEqual t.SimpleExprIn t.SimpleExprOut> : True =
+            <S12n_Set_Make (e.X) t.SimpleExprOut>;
 
         /* If expr was changed, renew S12n_Set. */
-        t.SimpleExprIn t.SimpleExprOut =
+        t.SimpleExprIn t.SimpleExprOut,
+        <IsSimpleExprEqual t.SimpleExprIn t.SimpleExprOut> : False =
             <S12n_Set_Make <S12n_Set> t.SimpleExprOut>;
     };
 
@@ -355,6 +372,12 @@ $ENTRY FractionCancellation_NonMonomialFraction
     t.NonMonomialFrac = t.NonMonomialFrac;
 }
 
+ChangeMonadicMinus
+{
+    '-' e.X = MonadicMinus e.X;
+    e.X = e.X;
+}
+
 SubConstMult
 {
     (MonadicMinus s.N1 s.D1) (MonadicMinus s.N2 s.D2) =
@@ -362,13 +385,17 @@ SubConstMult
 
     (MonadicMinus s.N1 s.D1) (s.N2 s.D2) =
         (
-            <+ (<Mul ('-' s.N1) s.D2>) <Mul (s.N2) s.D1>>
+            <ChangeMonadicMinus
+                <+ (<Mul ('-' s.N1) s.D2>) <Mul (s.N2) s.D1>>
+            >
             <Mul (s.D1) s.D2>
         );
 
     (s.N1 s.D1) (MonadicMinus s.N2 s.D2) =
         (
-            <+ (<Mul (s.N1) s.D2>) <Mul ('-' s.N2) s.D1>>
+            <ChangeMonadicMinus
+                <+ (<Mul (s.N1) s.D2>) <Mul ('-' s.N2) s.D1>>
+            >
             <Mul (s.D1) s.D2>
         );
 
@@ -381,7 +408,7 @@ SubConstMult
 
 $ENTRY ReduceSummandCount_SimpleExpression
 {
-    (e.X t.SimpleSummand_1 t.SimpleSummand_2 e.Y),
+    (e.X t.SimpleSummand_1 e.Y t.SimpleSummand_2 e.Z),
     t.SimpleSummand_1 : (t.ConstMult_1 t.Monomial t.NonMonomial),
     t.SimpleSummand_2 : (t.ConstMult_2 t.Monomial t.NonMonomial) =
         <ReduceSummandCount_SimpleExpression
@@ -395,6 +422,8 @@ $ENTRY ReduceSummandCount_SimpleExpression
                 )
 
                 e.Y
+
+                e.Z
             )
         >;
 
