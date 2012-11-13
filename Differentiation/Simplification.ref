@@ -54,6 +54,12 @@ S12n_Set
             )
 
             (
+                OpenUnnecessaryBracketsAroundSummands_SimpleExpression
+                NoS12n
+                NoS12n
+            )
+
+            (
                 NoS12n
                 NoS12n
                 FractionCancellation_NonMonomialFraction
@@ -578,4 +584,27 @@ $ENTRY RereadViaParser_SimpleExpression
                 <FormatTopLevelSimpleExpression t.SimpleExpr>
             >
         >;
+}
+
+GetSummands
+{
+    (Invol t.SimpleExpr t.ConstPower) =;
+
+    (s.FuncName t.SimpleExpr),
+    <IsFunctionName s.FuncName> : True =;
+
+    (e.SimpleSummands) = e.SimpleSummands;
+}
+
+$ENTRY OpenUnnecessaryBracketsAroundSummands_SimpleExpression
+{
+    (e.X t.SimpleSummand e.Y),
+    t.SimpleSummand : ((1 1) () ((t.N) ())),
+    <GetSummands t.N> : e.InternalSummands,
+    <IsNothing e.InternalSummands> : False =
+        <OpenUnnecessaryBracketsAroundSummands_SimpleExpression
+            (e.X e.InternalSummands e.Y)
+        >;
+
+    t.SimpleExpr = t.SimpleExpr;
 }
